@@ -1,0 +1,152 @@
+/**
+ * AI SEO Filler — admin styles.
+ */
+
+.ai-seo-filler-wrap {
+	max-width: 800px;
+}
+
+.ai-seo-filler-card {
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	padding: 20px 24px;
+	margin: 20px 0;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+.ai-seo-filler-card h2 {
+	margin-top: 0;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #f0f0f1;
+}
+
+.ai-seo-filler-status-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.ai-seo-filler-status-list li {
+	padding: 6px 0;
+}
+
+.ai-seo-filler-badge {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 3px;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.ai-seo-filler-badge--ok {
+	background: #d1fae5;
+	color: #065f46;
+}
+
+.ai-seo-filler-badge--warn {
+	background: #fef3c7;
+	color: #92400e;
+}
+
+.ai-seo-filler-metabox .button {
+	width: 100%;
+	margin-top: 8px;
+}
+
+.ai-seo-filler-status {
+	margin-top: 10px;
+	font-size: 13px;
+}
+
+.ai-seo-filler-status.is-loading {
+	color: #2271b1;
+}
+
+.ai-seo-filler-status.is-success {
+	color: #00a32a;
+}
+
+.ai-seo-filler-status.is-error {
+	color: #d63638;
+}
+
+.ai-seo-filler-actions {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.ai-seo-filler-progress-bar-wrap {
+	background: #f0f0f1;
+	border-radius: 4px;
+	height: 24px;
+	overflow: hidden;
+	margin: 16px 0;
+}
+
+.ai-seo-filler-progress-bar {
+	background: #2271b1;
+	height: 100%;
+	width: 0;
+	transition: width 0.4s ease;
+	border-radius: 4px;
+}
+
+.ai-seo-filler-progress-stats {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px 24px;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.ai-seo-filler-progress-stats li {
+	font-size: 14px;
+}
+
+.ai-seo-filler-error-log {
+	margin-top: 16px;
+	padding-top: 16px;
+	border-top: 1px solid #f0f0f1;
+}
+
+.ai-seo-filler-error-log h3 {
+	margin: 0 0 8px;
+	font-size: 13px;
+}
+
+.ai-seo-filler-error-log ul {
+	margin: 0;
+	padding-left: 20px;
+	font-size: 13px;
+	color: #d63638;
+}
+
+.ai-seo-filler-error-log li {
+	margin-bottom: 4px;
+}
+
+.ai-seo-filler-provider-panel {
+	margin: 0 0 20px;
+	padding: 16px 20px;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	background: #f9f9f9;
+}
+
+.ai-seo-filler-provider-panel h2 {
+	margin: 0 0 12px;
+	padding: 0;
+	border: 0;
+	font-size: 14px;
+}
+
+.ai-seo-filler-provider-panel.is-hidden {
+	display: none;
+}
+
+.ai-seo-filler-provider-panel .form-table {
+	margin-top: 0;
+}

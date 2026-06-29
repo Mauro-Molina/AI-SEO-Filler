@@ -1,0 +1,301 @@
+# Copyright (C) 2026 Mauro Molina Mazón
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: AI SEO Filler 0.1.0\n"
+"Report-Msgid-Bugs-To: https://yourwebsite.com/ai-seo-filler\n"
+"POT-Creation-Date: 2026-06-29 00:00+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: includes/class-ai-seo-bulk.php
+msgid "Every minute (AI SEO Filler)"
+msgstr ""
+
+#: includes/class-ai-seo-bulk.php
+msgid "Insufficient permissions."
+msgstr ""
+
+#: includes/class-ai-seo-bulk.php
+msgid "Gemini API key is not configured."
+msgstr ""
+
+#: includes/class-ai-seo-bulk.php
+msgid "No compatible SEO plugin detected."
+msgstr ""
+
+#: includes/class-ai-seo-bulk.php
+msgid "Invalid content type."
+msgstr ""
+
+#: includes/class-ai-seo-bulk.php
+msgid "Invalid post status."
+msgstr ""
+
+#: includes/class-ai-seo-bulk.php
+msgid "No posts found to process."
+msgstr ""
+
+#: includes/class-ai-seo-bulk.php
+msgid "%d posts queued for processing."
+msgstr ""
+
+#: includes/class-ai-seo-bulk.php
+msgid "Bulk processing cancelled."
+msgstr ""
+
+#: includes/class-ai-seo-core.php
+msgid "Invalid post."
+msgstr ""
+
+#: includes/class-ai-seo-core.php
+msgid "You cannot edit this post."
+msgstr ""
+
+#: includes/class-ai-seo-core.php
+msgid "SEO fields generated and saved successfully."
+msgstr ""
+
+#: includes/class-ai-seo-gemini.php
+msgid "Invalid post ID."
+msgstr ""
+
+#: includes/class-ai-seo-gemini.php
+msgid "Post not found."
+msgstr ""
+
+#: includes/class-ai-seo-gemini.php
+msgid "Gemini connection error: %s"
+msgstr ""
+
+#: includes/class-ai-seo-gemini.php
+msgid "Unknown Gemini API error."
+msgstr ""
+
+#: includes/class-ai-seo-gemini.php
+msgid "Gemini returned error %1$d: %2$s"
+msgstr ""
+
+#: includes/class-ai-seo-gemini.php
+msgid "Gemini response is not valid JSON."
+msgstr ""
+
+#: includes/class-ai-seo-gemini.php
+msgid "Gemini returned no content."
+msgstr ""
+
+#: includes/class-ai-seo-gemini.php
+msgid "Could not parse Gemini JSON response."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php
+msgid "AI SEO Filler"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php
+msgid "Settings"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php
+msgid "Bulk Processing"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php
+msgid "Generating SEO fields…"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php
+msgid "SEO fields generated successfully."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php
+msgid "Failed to generate SEO fields."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php
+msgid "Processing…"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php
+msgid "Bulk processing completed."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php
+msgid "Configure your Gemini API key under AI SEO Filler → Settings."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php
+msgid "No active Rank Math or Yoast SEO plugin detected."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php
+msgid "Detected SEO plugin: %s"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php
+msgid "Generate SEO with AI"
+msgstr ""
+
+#: admin/views/settings-page.php
+msgid "Status"
+msgstr ""
+
+#: admin/views/settings-page.php
+msgid "API Key:"
+msgstr ""
+
+#: admin/views/settings-page.php
+msgid "Configured"
+msgstr ""
+
+#: admin/views/settings-page.php
+msgid "Not configured"
+msgstr ""
+
+#: admin/views/settings-page.php
+msgid "SEO Plugin:"
+msgstr ""
+
+#: admin/views/settings-page.php
+msgid "None detected"
+msgstr ""
+
+#: admin/views/settings-page.php
+msgid "Model:"
+msgstr ""
+
+#: admin/views/settings-page.php
+msgid "Gemini API Key"
+msgstr ""
+
+#: admin/views/settings-page.php
+msgid "Enter your Google AI API key"
+msgstr ""
+
+#: admin/views/settings-page.php
+msgid "Get a free API key at Google AI Studio. Leave blank to keep the current key."
+msgstr ""
+
+#: admin/views/settings-page.php
+msgid "Content Language"
+msgstr ""
+
+#: admin/views/settings-page.php
+msgid "Locale code used to instruct Gemini (e.g. en_US, es_ES). Defaults to your WordPress locale."
+msgstr ""
+
+#: admin/views/settings-page.php
+msgid "Auto-detect"
+msgstr ""
+
+#: admin/views/settings-page.php
+msgid "Rank Math"
+msgstr ""
+
+#: admin/views/settings-page.php
+msgid "Yoast SEO"
+msgstr ""
+
+#: admin/views/settings-page.php
+msgid "Choose which SEO plugin receives the generated fields. Auto-detect is recommended."
+msgstr ""
+
+#: admin/views/settings-page.php
+msgid "Save Settings"
+msgstr ""
+
+#: admin/views/bulk-page.php
+msgid "Configure your Gemini API key before running bulk processing."
+msgstr ""
+
+#: admin/views/bulk-page.php
+msgid "No compatible SEO plugin detected. Install Rank Math or Yoast SEO first."
+msgstr ""
+
+#: admin/views/bulk-page.php
+msgid "Start Bulk Processing"
+msgstr ""
+
+#: admin/views/bulk-page.php
+msgid "Posts are processed in batches of %d via WP-Cron (approximately one batch per minute)."
+msgstr ""
+
+#: admin/views/bulk-page.php
+msgid "Content Type"
+msgstr ""
+
+#: admin/views/bulk-page.php
+msgid "Posts"
+msgstr ""
+
+#: admin/views/bulk-page.php
+msgid "Pages"
+msgstr ""
+
+#: admin/views/bulk-page.php
+msgid "Products"
+msgstr ""
+
+#: admin/views/bulk-page.php
+msgid "Post Status"
+msgstr ""
+
+#: admin/views/bulk-page.php
+msgid "Published"
+msgstr ""
+
+#: admin/views/bulk-page.php
+msgid "Draft"
+msgstr ""
+
+#: admin/views/bulk-page.php
+msgid "Pending"
+msgstr ""
+
+#: admin/views/bulk-page.php
+msgid "Private"
+msgstr ""
+
+#: admin/views/bulk-page.php
+msgid "Scheduled"
+msgstr ""
+
+#: admin/views/bulk-page.php
+msgid "Start Bulk Generation"
+msgstr ""
+
+#: admin/views/bulk-page.php
+msgid "Cancel Queue"
+msgstr ""
+
+#: admin/views/bulk-page.php
+msgid "Progress"
+msgstr ""
+
+#: admin/views/bulk-page.php
+msgid "Total:"
+msgstr ""
+
+#: admin/views/bulk-page.php
+msgid "Processed:"
+msgstr ""
+
+#: admin/views/bulk-page.php
+msgid "Pending:"
+msgstr ""
+
+#: admin/views/bulk-page.php
+msgid "Errors:"
+msgstr ""
+
+#: admin/views/bulk-page.php
+msgid "Recent Errors"
+msgstr ""
+
+#: admin/views/bulk-page.php
+msgid "Post #%1$d: %2$s"
+msgstr ""
