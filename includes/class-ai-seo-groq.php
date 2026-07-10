@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Communicates with the Groq OpenAI-compatible Chat Completions API.
  */
-class Groq {
+class Groq implements AI_Provider_Interface {
 
 	/**
 	 * Maximum HTTP request timeout in seconds.
@@ -35,13 +35,20 @@ class Groq {
 	 */
 	private $retry_delay = 2;
 
+	public function get_slug() {
+		return 'groq';
+	}
+
+	public function get_label() {
+		return 'Groq';
+	}
+
 	/**
-	 * Generates SEO data for a post or product using Groq.
-	 *
-	 * @param int $post_id Post or product ID.
-	 * @return array|\WP_Error Structured SEO fields or WP_Error.
+	 * @param int   $post_id Post ID.
+	 * @param array $args    Generation args.
+	 * @return array|\WP_Error
 	 */
-	public function generate_seo_data( $post_id ) {
+	public function generate_seo_data( $post_id, $args = array() ) {
 		$post = AI_Content::get_valid_post( $post_id );
 
 		if ( is_wp_error( $post ) ) {
@@ -65,14 +72,63 @@ class Groq {
 		}
 
 		$content_data = AI_Content::gather_post_content( $post );
-		$prompt       = AI_Content::build_prompt( $content_data );
+		$prompt       = AI_Content::build_prompt( $content_data, $args );
 		$response     = $this->call_api( $api_key, $prompt );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
 
-		return AI_Content::parse_seo_response( $response );
+		$seo_data = AI_Content::parse_seo_response( $response, $post_id );
+
+		if ( is_wp_error( $seo_data ) ) {
+			return $seo_data;
+		}
+
+		$provider = $this;
+
+		return AI_Content::complete_with_body_content(
+			$post_id,
+			$seo_data,
+			$content_data,
+			$args,
+			function ( $body_prompt ) use ( $provider, $api_key ) {
+				return $provider->call_text_api( $api_key, $body_prompt );
+			}
+		);
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function test_connection() {
+		$api_key = Settings::get_groq_api_key();
+		if ( empty( $api_key ) ) {
+			return new \WP_Error( 'missing_api_key', __( 'Groq API key is not configured.', 'ai-seo-filler' ) );
+		}
+
+		$response = wp_remote_post(
+			AI_SEO_FILLER_GROQ_API_URL,
+			array(
+				'timeout' => 30,
+				'headers' => array(
+					'Content-Type'  => 'application/json',
+					'Authorization' => 'Bearer ' . $api_key,
+				),
+				'body'    => wp_json_encode( array(
+					'model'      => Settings::get_groq_model(),
+					'messages'   => array( array( 'role' => 'user', 'content' => 'ping' ) ),
+					'max_tokens' => 5,
+				) ),
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		$code = wp_remote_retrieve_response_code( $response );
+		return ( $code >= 200 && $code < 300 ) ? true : new \WP_Error( 'groq_test_failed', __( 'Groq API test failed.', 'ai-seo-filler' ) );
 	}
 
 	/**
@@ -91,7 +147,7 @@ class Groq {
 			'messages'        => array(
 				array(
 					'role'    => 'system',
-					'content' => 'You are a WordPress SEO expert optimizing for Rank Math scoring. Respond only with valid JSON, no markdown. Follow all Rank Math rules in the user prompt strictly, including 600+ word optimized_content with focus keyword at the start.',
+					'content' => 'You are a WordPress SEO expert optimizing for Rank Math scoring. Respond only with valid JSON, no markdown. Meta fields only — leave optimized_content and short_description as empty strings.',
 				),
 				array(
 					'role'    => 'user',
@@ -99,7 +155,7 @@ class Groq {
 				),
 			),
 			'temperature'     => 0.4,
-			'max_tokens'      => 8192,
+			'max_tokens'      => 2048,
 			'response_format' => array( 'type' => 'json_object' ),
 		);
 
@@ -232,5 +288,94 @@ class Groq {
 		}
 
 		return trim( $decoded['choices'][0]['message']['content'] );
+	}
+
+	/**
+	 * Calls Groq for plain-text HTML body content.
+	 *
+	 * @param string $api_key API key.
+	 * @param string $prompt  Body content prompt.
+	 * @return string|\WP_Error
+	 */
+	public function call_text_api( $api_key, $prompt ) {
+		$api_key = trim( $api_key );
+		$model   = Settings::get_groq_model();
+
+		$body = array(
+			'model'       => $model,
+			'messages'    => array(
+				array(
+					'role'    => 'system',
+					'content' => 'You are a WordPress SEO content writer. Return only raw HTML for the post body.',
+				),
+				array(
+					'role'    => 'user',
+					'content' => $prompt,
+				),
+			),
+			'temperature' => 0.5,
+			'max_tokens'  => 8192,
+		);
+
+		$attempt    = 0;
+		$delay      = $this->retry_delay;
+		$last_error = null;
+
+		while ( $attempt < $this->max_retries ) {
+			$attempt++;
+
+			$response = wp_remote_post(
+				AI_SEO_FILLER_GROQ_API_URL,
+				array(
+					'timeout' => $this->timeout,
+					'headers' => array(
+						'Content-Type'  => 'application/json',
+						'Authorization' => 'Bearer ' . $api_key,
+					),
+					'body'    => wp_json_encode( $body ),
+				)
+			);
+
+			if ( is_wp_error( $response ) ) {
+				$last_error = new \WP_Error(
+					'groq_request_failed',
+					sprintf(
+						/* translators: %s: network error message */
+						__( 'Groq connection error: %s', 'ai-seo-filler' ),
+						$response->get_error_message()
+					)
+				);
+
+				if ( $attempt < $this->max_retries ) {
+					sleep( $delay );
+					$delay *= 2;
+					continue;
+				}
+
+				return $last_error;
+			}
+
+			$status_code = wp_remote_retrieve_response_code( $response );
+			$raw_body    = wp_remote_retrieve_body( $response );
+
+			if ( $status_code >= 200 && $status_code < 300 ) {
+				return $this->parse_api_response_body( $raw_body );
+			}
+
+			$last_error = $this->build_api_error( $status_code, $raw_body );
+
+			if ( $this->is_retryable_status( $status_code ) && $attempt < $this->max_retries ) {
+				sleep( $delay );
+				$delay *= 2;
+				continue;
+			}
+
+			return $last_error;
+		}
+
+		return $last_error ? $last_error : new \WP_Error(
+			'groq_api_error',
+			__( 'Groq request failed after multiple attempts.', 'ai-seo-filler' )
+		);
 	}
 }

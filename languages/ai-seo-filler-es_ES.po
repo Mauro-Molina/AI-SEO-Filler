@@ -1,0 +1,37 @@
+# Spanish translations for AI SEO Filler.
+msgid ""
+msgstr ""
+"Project-Id-Version: AI SEO Filler 0.2.0\n"
+"Language: es_ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Generate all SEO"
+msgstr "Generar todo el SEO"
+
+msgid "Meta only"
+msgstr "Solo meta"
+
+msgid "Preview before applying"
+msgstr "Vista previa antes de aplicar"
+
+msgid "SEO Preview"
+msgstr "Vista previa SEO"
+
+msgid "Apply changes"
+msgstr "Aplicar cambios"
+
+msgid "Score"
+msgstr "Puntuación"
+
+msgid "Focus keyword"
+msgstr "Palabra clave principal"
+
+msgid "Test API Connection"
+msgstr "Probar conexión API"
+
+msgid "Bulk processing paused."
+msgstr "Procesamiento masivo en pausa."
+
+msgid "Bulk processing resumed."
+msgstr "Procesamiento masivo reanudado."

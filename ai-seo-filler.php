@@ -7,7 +7,7 @@
  * Author URI:      https://yourwebsite.com
  * Text Domain:     ai-seo-filler
  * Domain Path:     /languages
- * Version:         0.1.0
+ * Version:         0.2.4
  * Requires at least: 6.0
  * Requires PHP:    7.4
  * License:         GPL-2.0-or-later
@@ -19,7 +19,7 @@
 defined( 'ABSPATH' ) || exit;
 
 /** Current plugin version. */
-define( 'AI_SEO_FILLER_VERSION', '0.1.0' );
+define( 'AI_SEO_FILLER_VERSION', '0.2.4' );
 
 /** Absolute path to the plugin directory. */
 define( 'AI_SEO_FILLER_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
@@ -65,6 +65,47 @@ define( 'AI_SEO_FILLER_GEMINI_API_URL', 'https://generativelanguage.googleapis.c
 
 /** Number of items processed per WP-Cron bulk batch. */
 define( 'AI_SEO_FILLER_BULK_BATCH_SIZE', 10 );
+
+/** Option name for the encrypted OpenAI API key. */
+define( 'AI_SEO_FILLER_OPTION_OPENAI_API_KEY', AI_SEO_FILLER_OPTION_PREFIX . 'openai_api_key' );
+
+/** Option name for the OpenAI model slug. */
+define( 'AI_SEO_FILLER_OPTION_OPENAI_MODEL', AI_SEO_FILLER_OPTION_PREFIX . 'openai_model' );
+
+/** Default OpenAI model. */
+define( 'AI_SEO_FILLER_OPENAI_MODEL_DEFAULT', 'gpt-4o-mini' );
+
+/** OpenAI Chat Completions API endpoint. */
+define( 'AI_SEO_FILLER_OPENAI_API_URL', 'https://api.openai.com/v1/chat/completions' );
+
+/** Default OpenAI image model. */
+define( 'AI_SEO_FILLER_OPENAI_IMAGE_MODEL_DEFAULT', 'dall-e-3' );
+
+/** Option name for the OpenAI image model. */
+define( 'AI_SEO_FILLER_OPTION_OPENAI_IMAGE_MODEL', AI_SEO_FILLER_OPTION_PREFIX . 'openai_image_model' );
+
+/** Default Gemini native image model (generateContent API). */
+define( 'AI_SEO_FILLER_GEMINI_IMAGE_MODEL_DEFAULT', 'gemini-2.5-flash-image' );
+
+/** Option name for the Gemini image model. */
+define( 'AI_SEO_FILLER_OPTION_GEMINI_IMAGE_MODEL', AI_SEO_FILLER_OPTION_PREFIX . 'gemini_image_model' );
+
+/** Option name for the image generation provider (auto, flux, openai, gemini). */
+define( 'AI_SEO_FILLER_OPTION_IMAGE_PROVIDER', AI_SEO_FILLER_OPTION_PREFIX . 'image_provider' );
+
+/** Pollinations image API base URL (Flux free tier). */
+define( 'AI_SEO_FILLER_POLLINATIONS_IMAGE_URL', 'https://image.pollinations.ai/prompt/' );
+
+/** Default Pollinations / Flux model. */
+define( 'AI_SEO_FILLER_FLUX_MODEL_DEFAULT', 'flux' );
+
+/** Option name for the Flux / Pollinations model. */
+define( 'AI_SEO_FILLER_OPTION_FLUX_MODEL', AI_SEO_FILLER_OPTION_PREFIX . 'flux_model' );
+
+/** Default minimum content word count for Rank Math. */
+define( 'AI_SEO_FILLER_MIN_WORD_COUNT_DEFAULT', 600 );
+
+require_once AI_SEO_FILLER_PLUGIN_DIR . 'includes/interface-ai-seo-provider.php';
 
 /**
  * Simplified PSR-4 autoloader for the AiSeoFiller\ namespace.
@@ -133,6 +174,7 @@ final class AI_SEO_Filler_Bootstrap {
 		}
 
 		self::$core->init();
+		\AiSeoFiller\CLI::register();
 	}
 
 	/**

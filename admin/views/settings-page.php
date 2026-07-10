@@ -25,12 +25,86 @@ $detected_label = 'none' === $seo_plugin
 
 $current_provider = Settings::get_ai_provider();
 $current_seo      = get_option( AI_SEO_FILLER_OPTION_PREFIX . 'seo_plugin', 'auto' );
-$current_lang     = get_option( AI_SEO_FILLER_OPTION_PREFIX . 'language', get_locale() );
+$current_lang     = Settings::get_content_language();
+$content_languages = Settings::get_available_content_languages();
 $current_model    = Settings::get_active_model();
 $gemini_models    = Settings::get_available_models();
 $groq_models      = Settings::get_available_groq_models();
 $current_gemini   = Settings::get_gemini_model();
 $current_groq     = Settings::get_groq_model();
+
+$gemini_key = Settings::get_api_key();
+$groq_key   = Settings::get_groq_api_key();
+$openai_key = Settings::get_openai_api_key();
+
+/**
+ * Renders an API secret field with show/hide, copy, and configured status.
+ *
+ * @param array $args Field args.
+ */
+$ai_seo_render_secret_field = static function ( $args ) {
+	$id          = (string) ( $args['id'] ?? '' );
+	$name        = (string) ( $args['name'] ?? '' );
+	$value       = (string) ( $args['value'] ?? '' );
+	$label       = (string) ( $args['label'] ?? '' );
+	$placeholder = (string) ( $args['placeholder'] ?? '' );
+	$help        = (string) ( $args['help'] ?? '' );
+	$configured  = ! empty( $args['configured'] );
+	$status_id   = (string) ( $args['status_id'] ?? '' );
+	$extra_html  = (string) ( $args['extra_html'] ?? '' );
+	$preview     = $configured ? Settings::get_secret_preview( $value ) : '';
+	?>
+	<div class="ai-seo-filler-secret-field">
+		<input
+			type="text"
+			id="<?php echo esc_attr( $id ); ?>"
+			name="<?php echo esc_attr( $name ); ?>"
+			value="<?php echo esc_attr( $value ); ?>"
+			class="regular-text ai-seo-filler-secret-input is-masked"
+			autocomplete="off"
+			spellcheck="false"
+			data-has-secret="<?php echo $configured ? '1' : '0'; ?>"
+			placeholder="<?php echo esc_attr( $placeholder ); ?>"
+		/>
+		<button type="button" class="button ai-seo-filler-toggle-secret" aria-label="<?php esc_attr_e( 'Show key', 'ai-seo-filler' ); ?>"><?php esc_html_e( 'Show', 'ai-seo-filler' ); ?></button>
+		<button type="button" class="button ai-seo-filler-copy-secret" <?php disabled( ! $configured && '' === $value ); ?> aria-label="<?php esc_attr_e( 'Copy key', 'ai-seo-filler' ); ?>"><?php esc_html_e( 'Copy', 'ai-seo-filler' ); ?></button>
+	</div>
+	<p class="description ai-seo-filler-secret-status" <?php echo $status_id ? 'id="' . esc_attr( $status_id ) . '"' : ''; ?>>
+		<?php if ( $configured ) : ?>
+			<span class="ai-seo-filler-badge ai-seo-filler-badge--ok">
+				<?php
+				echo esc_html(
+					sprintf(
+						/* translators: 1: provider label, 2: key preview */
+						__( '%1$s configured (%2$s)', 'ai-seo-filler' ),
+						$label,
+						$preview
+					)
+				);
+				?>
+			</span>
+		<?php else : ?>
+			<span class="ai-seo-filler-badge ai-seo-filler-badge--warn">
+				<?php
+				echo esc_html(
+					sprintf(
+						/* translators: %s: provider label */
+						__( '%s not configured', 'ai-seo-filler' ),
+						$label
+					)
+				);
+				?>
+			</span>
+			<?php if ( $help ) : ?>
+				<span class="ai-seo-filler-secret-help"><?php echo esc_html( $help ); ?></span>
+			<?php endif; ?>
+		<?php endif; ?>
+	</p>
+	<?php
+	if ( $extra_html ) {
+		echo $extra_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built by trusted callers.
+	}
+};
 ?>
 <div class="wrap ai-seo-filler-wrap">
 	<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
@@ -39,16 +113,53 @@ $current_groq     = Settings::get_groq_model();
 
 	<div class="ai-seo-filler-card ai-seo-filler-status-card">
 		<h2><?php esc_html_e( 'Status', 'ai-seo-filler' ); ?></h2>
+		<?php if ( 'openai' === $current_provider ) : ?>
+			<p class="description" style="margin-top:0;">
+				<?php esc_html_e( 'Free tier tip: OpenAI requires paid credits. For $0 cost, set AI Provider to Google Gemini and add a free key from aistudio.google.com/apikey.', 'ai-seo-filler' ); ?>
+			</p>
+		<?php endif; ?>
 		<ul class="ai-seo-filler-status-list">
 			<li>
 				<strong><?php esc_html_e( 'AI Provider:', 'ai-seo-filler' ); ?></strong>
 				<?php echo esc_html( AI_Provider::get_active_provider_label() ); ?>
 			</li>
 			<li>
-				<strong><?php esc_html_e( 'API Key:', 'ai-seo-filler' ); ?></strong>
-				<?php echo Settings::has_active_provider_configured()
-					? '<span class="ai-seo-filler-badge ai-seo-filler-badge--ok">' . esc_html__( 'Configured', 'ai-seo-filler' ) . '</span>'
-					: '<span class="ai-seo-filler-badge ai-seo-filler-badge--warn">' . esc_html__( 'Not configured', 'ai-seo-filler' ) . '</span>'; ?>
+				<strong><?php esc_html_e( 'Configured APIs:', 'ai-seo-filler' ); ?></strong>
+				<span class="ai-seo-filler-api-status-list">
+					<?php if ( Settings::has_api_key() ) : ?>
+						<span class="ai-seo-filler-badge ai-seo-filler-badge--ok"><?php echo esc_html( sprintf( __( 'Gemini (%s)', 'ai-seo-filler' ), Settings::get_secret_preview( $gemini_key ) ) ); ?></span>
+					<?php else : ?>
+						<span class="ai-seo-filler-badge ai-seo-filler-badge--warn"><?php esc_html_e( 'Gemini not set', 'ai-seo-filler' ); ?></span>
+					<?php endif; ?>
+					<?php if ( Settings::has_groq_api_key() ) : ?>
+						<span class="ai-seo-filler-badge ai-seo-filler-badge--ok"><?php echo esc_html( sprintf( __( 'Groq (%s)', 'ai-seo-filler' ), Settings::get_secret_preview( $groq_key ) ) ); ?></span>
+					<?php else : ?>
+						<span class="ai-seo-filler-badge ai-seo-filler-badge--warn"><?php esc_html_e( 'Groq not set', 'ai-seo-filler' ); ?></span>
+					<?php endif; ?>
+					<?php if ( Settings::has_openai_api_key() ) : ?>
+						<span class="ai-seo-filler-badge ai-seo-filler-badge--ok"><?php echo esc_html( sprintf( __( 'OpenAI (%s)', 'ai-seo-filler' ), Settings::get_secret_preview( $openai_key ) ) ); ?></span>
+					<?php else : ?>
+						<span class="ai-seo-filler-badge ai-seo-filler-badge--warn"><?php esc_html_e( 'OpenAI not set', 'ai-seo-filler' ); ?></span>
+					<?php endif; ?>
+				</span>
+			</li>
+			<li>
+				<strong><?php esc_html_e( 'Active text API:', 'ai-seo-filler' ); ?></strong>
+				<?php
+				if ( Settings::has_active_provider_configured() ) {
+					$active_preview = '';
+					if ( 'gemini' === $current_provider ) {
+						$active_preview = Settings::get_secret_preview( $gemini_key );
+					} elseif ( 'groq' === $current_provider ) {
+						$active_preview = Settings::get_secret_preview( $groq_key );
+					} elseif ( 'openai' === $current_provider ) {
+						$active_preview = Settings::get_secret_preview( $openai_key );
+					}
+					echo '<span class="ai-seo-filler-badge ai-seo-filler-badge--ok">' . esc_html( AI_Provider::get_active_provider_label() . ( $active_preview ? ' — ' . $active_preview : '' ) ) . '</span>';
+				} else {
+					echo '<span class="ai-seo-filler-badge ai-seo-filler-badge--warn">' . esc_html__( 'Not configured', 'ai-seo-filler' ) . '</span>';
+				}
+				?>
 			</li>
 			<li>
 				<strong><?php esc_html_e( 'SEO Plugin:', 'ai-seo-filler' ); ?></strong>
@@ -95,20 +206,22 @@ $current_groq     = Settings::get_groq_model();
 						<label for="ai_seo_filler_gemini_api_key"><?php esc_html_e( 'Gemini API Key', 'ai-seo-filler' ); ?></label>
 					</th>
 					<td>
-						<input
-							type="password"
-							id="ai_seo_filler_gemini_api_key"
-							name="<?php echo esc_attr( AI_SEO_FILLER_OPTION_API_KEY ); ?>"
-							value=""
-							class="regular-text"
-							autocomplete="new-password"
-							placeholder="<?php echo esc_attr( Settings::has_api_key()
-								? __( 'Key saved — paste a new key to replace it', 'ai-seo-filler' )
-								: __( 'Enter your Google AI API key', 'ai-seo-filler' ) ); ?>"
-						/>
-						<p class="description">
-							<?php esc_html_e( 'Get a free API key at aistudio.google.com/apikey. Leave blank to keep the current key.', 'ai-seo-filler' ); ?>
-						</p>
+						<?php
+						$ai_seo_render_secret_field(
+							array(
+								'id'          => 'ai_seo_filler_gemini_api_key',
+								'name'        => AI_SEO_FILLER_OPTION_API_KEY,
+								'value'       => $gemini_key,
+								'label'       => __( 'Gemini', 'ai-seo-filler' ),
+								'placeholder' => Settings::has_api_key()
+									? __( 'Paste a new key to replace the current one', 'ai-seo-filler' )
+									: __( 'Enter your Google AI API key', 'ai-seo-filler' ),
+								'help'        => __( 'Get a free API key at aistudio.google.com/apikey.', 'ai-seo-filler' ),
+								'configured'  => Settings::has_api_key(),
+								'status_id'   => 'ai-seo-filler-gemini-key-status',
+							)
+						);
+						?>
 					</td>
 				</tr>
 				<tr>
@@ -136,20 +249,22 @@ $current_groq     = Settings::get_groq_model();
 						<label for="ai_seo_filler_groq_api_key"><?php esc_html_e( 'Groq API Key', 'ai-seo-filler' ); ?></label>
 					</th>
 					<td>
-						<input
-							type="password"
-							id="ai_seo_filler_groq_api_key"
-							name="<?php echo esc_attr( AI_SEO_FILLER_OPTION_GROQ_API_KEY ); ?>"
-							value=""
-							class="regular-text"
-							autocomplete="new-password"
-							placeholder="<?php echo esc_attr( Settings::has_groq_api_key()
-								? __( 'Key saved — paste a new key to replace it', 'ai-seo-filler' )
-								: __( 'Enter your Groq API key (gsk_...)', 'ai-seo-filler' ) ); ?>"
-						/>
-						<p class="description">
-							<?php esc_html_e( 'Get a free API key at console.groq.com. Leave blank to keep the current key.', 'ai-seo-filler' ); ?>
-						</p>
+						<?php
+						$ai_seo_render_secret_field(
+							array(
+								'id'          => 'ai_seo_filler_groq_api_key',
+								'name'        => AI_SEO_FILLER_OPTION_GROQ_API_KEY,
+								'value'       => $groq_key,
+								'label'       => __( 'Groq', 'ai-seo-filler' ),
+								'placeholder' => Settings::has_groq_api_key()
+									? __( 'Paste a new key to replace the current one', 'ai-seo-filler' )
+									: __( 'Enter your Groq API key (gsk_...)', 'ai-seo-filler' ),
+								'help'        => __( 'Get a free API key at console.groq.com.', 'ai-seo-filler' ),
+								'configured'  => Settings::has_groq_api_key(),
+								'status_id'   => 'ai-seo-filler-groq-key-status',
+							)
+						);
+						?>
 					</td>
 				</tr>
 				<tr>
@@ -172,22 +287,170 @@ $current_groq     = Settings::get_groq_model();
 			</table>
 		</div>
 
+		<div class="ai-seo-filler-provider-panel ai-seo-filler-provider-panel--openai" data-provider="openai">
+			<h2><?php esc_html_e( 'OpenAI', 'ai-seo-filler' ); ?></h2>
+			<p class="description"><?php esc_html_e( 'OpenAI API key for images is configured in the AI Image Generation section below.', 'ai-seo-filler' ); ?></p>
+			<table class="form-table" role="presentation">
+				<tr>
+					<th scope="row"><label for="ai_seo_filler_openai_model"><?php esc_html_e( 'OpenAI Model', 'ai-seo-filler' ); ?></label></th>
+					<td>
+						<select id="ai_seo_filler_openai_model" name="<?php echo esc_attr( AI_SEO_FILLER_OPTION_OPENAI_MODEL ); ?>">
+							<?php foreach ( Settings::get_available_openai_models() as $value => $label ) : ?>
+								<option value="<?php echo esc_attr( $value ); ?>" <?php selected( Settings::get_openai_model(), $value ); ?>><?php echo esc_html( $label ); ?></option>
+							<?php endforeach; ?>
+						</select>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+		<div class="ai-seo-filler-card" style="margin:0 0 20px;padding:16px;">
+			<h2><?php esc_html_e( 'AI Image Generation', 'ai-seo-filler' ); ?></h2>
+			<p class="description"><?php esc_html_e( 'Separate from SEO text generation. Creates a featured image and 3 gallery images for WooCommerce products (or a featured image for posts/pages) using the title and description.', 'ai-seo-filler' ); ?></p>
+			<table class="form-table" role="presentation">
+				<tr>
+					<th scope="row"><label for="ai_seo_filler_openai_api_key"><?php esc_html_e( 'OpenAI API Key', 'ai-seo-filler' ); ?></label></th>
+					<td>
+						<?php
+						ob_start();
+						?>
+						<p>
+							<button type="button" class="button button-secondary ai-seo-filler-save-openai-key"><?php esc_html_e( 'Save OpenAI Key', 'ai-seo-filler' ); ?></button>
+							<button type="button" class="button button-secondary ai-seo-filler-test-openai-key"><?php esc_html_e( 'Test OpenAI Key', 'ai-seo-filler' ); ?></button>
+							<span id="ai-seo-filler-openai-key-result" class="description"></span>
+						</p>
+						<?php
+						$openai_extra = ob_get_clean();
+						$ai_seo_render_secret_field(
+							array(
+								'id'          => 'ai_seo_filler_openai_api_key',
+								'name'        => Settings::OPENAI_SECRET_FIELD,
+								'value'       => $openai_key,
+								'label'       => __( 'OpenAI', 'ai-seo-filler' ),
+								'placeholder' => Settings::has_openai_api_key()
+									? __( 'Paste a new key to replace the current one', 'ai-seo-filler' )
+									: 'sk-proj-...',
+								'help'        => __( 'Required for DALL·E image generation and when OpenAI is the text provider.', 'ai-seo-filler' ),
+								'configured'  => Settings::has_openai_api_key(),
+								'status_id'   => 'ai-seo-filler-openai-key-status',
+								'extra_html'  => $openai_extra,
+							)
+						);
+						?>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="ai_seo_filler_image_provider"><?php esc_html_e( 'Image provider', 'ai-seo-filler' ); ?></label></th>
+					<td>
+						<select id="ai_seo_filler_image_provider" name="<?php echo esc_attr( AI_SEO_FILLER_OPTION_IMAGE_PROVIDER ); ?>">
+							<?php foreach ( Settings::get_available_image_providers() as $value => $label ) : ?>
+								<option value="<?php echo esc_attr( $value ); ?>" <?php selected( get_option( AI_SEO_FILLER_OPTION_IMAGE_PROVIDER, 'auto' ), $value ); ?>><?php echo esc_html( $label ); ?></option>
+							<?php endforeach; ?>
+						</select>
+						<p class="description"><?php esc_html_e( 'Flux (Pollinations) is free and needs no API key. Gemini/OpenAI are optional fallbacks with their own quotas.', 'ai-seo-filler' ); ?></p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="ai_seo_filler_flux_model"><?php esc_html_e( 'Flux model', 'ai-seo-filler' ); ?></label></th>
+					<td>
+						<select id="ai_seo_filler_flux_model" name="<?php echo esc_attr( AI_SEO_FILLER_OPTION_FLUX_MODEL ); ?>">
+							<?php foreach ( Settings::get_available_flux_models() as $value => $label ) : ?>
+								<option value="<?php echo esc_attr( $value ); ?>" <?php selected( Settings::get_flux_model(), $value ); ?>><?php echo esc_html( $label ); ?></option>
+							<?php endforeach; ?>
+						</select>
+						<p class="description"><?php esc_html_e( 'Uses Pollinations.ai. Free tier may be rate-limited; generating 4 product images can take a minute.', 'ai-seo-filler' ); ?></p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="ai_seo_filler_openai_image_model"><?php esc_html_e( 'OpenAI image model', 'ai-seo-filler' ); ?></label></th>
+					<td>
+						<input type="text" id="ai_seo_filler_openai_image_model" name="<?php echo esc_attr( AI_SEO_FILLER_OPTION_OPENAI_IMAGE_MODEL ); ?>" value="<?php echo esc_attr( Settings::get_openai_image_model() ); ?>" class="regular-text" />
+						<p class="description"><?php esc_html_e( 'Use dall-e-3 for DALL·E. GPT Image models (gpt-image-1, gpt-image-1.5) do not support response_format — the plugin handles that automatically.', 'ai-seo-filler' ); ?></p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="ai_seo_filler_gemini_image_model"><?php esc_html_e( 'Gemini image model', 'ai-seo-filler' ); ?></label></th>
+					<td>
+						<select id="ai_seo_filler_gemini_image_model" name="<?php echo esc_attr( AI_SEO_FILLER_OPTION_GEMINI_IMAGE_MODEL ); ?>">
+							<?php foreach ( Settings::get_available_gemini_image_models() as $value => $label ) : ?>
+								<option value="<?php echo esc_attr( $value ); ?>" <?php selected( Settings::get_gemini_image_model(), $value ); ?>><?php echo esc_html( $label ); ?></option>
+							<?php endforeach; ?>
+						</select>
+						<p class="description"><?php esc_html_e( 'Uses the Gemini generateContent API (not legacy Imagen predict).', 'ai-seo-filler' ); ?></p>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+		<div class="ai-seo-filler-card" style="margin:0 0 20px;padding:16px;">
+			<h2><?php esc_html_e( 'Generation Behavior', 'ai-seo-filler' ); ?></h2>
+			<div class="ai-seo-filler-settings-grid">
+				<?php
+				$bool_opts = array(
+					'preview_mode'    => __( 'Preview before applying', 'ai-seo-filler' ),
+					'only_if_empty'   => __( 'Only fill empty SEO fields', 'ai-seo-filler' ),
+					'revision_backup' => __( 'Create revision backup before overwrite', 'ai-seo-filler' ),
+					'enable_fallback' => __( 'Fallback to other providers on failure', 'ai-seo-filler' ),
+					'gen_meta'        => __( 'Generate meta title/description/keyword', 'ai-seo-filler' ),
+					'gen_slug'        => __( 'Generate URL slug', 'ai-seo-filler' ),
+					'gen_content'     => __( 'Rewrite post content (600+ words)', 'ai-seo-filler' ),
+					'gen_short_desc'  => __( 'Generate short description (WooCommerce)', 'ai-seo-filler' ),
+					'gen_image_alts'  => __( 'Generate image alt texts', 'ai-seo-filler' ),
+				);
+				foreach ( $bool_opts as $key => $label ) :
+					$opt = AI_SEO_FILLER_OPTION_PREFIX . $key;
+					?>
+					<label>
+						<input type="hidden" name="<?php echo esc_attr( $opt ); ?>" value="0" />
+						<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>" value="1" <?php checked( Settings::is_enabled( $key ) ); ?> />
+						<?php echo esc_html( $label ); ?>
+					</label>
+				<?php endforeach; ?>
+			</div>
+			<table class="form-table" role="presentation" style="margin-top:16px;">
+				<tr>
+					<th><label for="ai_seo_filler_min_word_count"><?php esc_html_e( 'Minimum word count', 'ai-seo-filler' ); ?></label></th>
+					<td><input type="number" min="300" max="3000" id="ai_seo_filler_min_word_count" name="<?php echo esc_attr( AI_SEO_FILLER_OPTION_PREFIX . 'min_word_count' ); ?>" value="<?php echo esc_attr( Settings::get_min_word_count() ); ?>" class="small-text" /></td>
+				</tr>
+				<tr>
+					<th><label for="ai_seo_filler_content_tone"><?php esc_html_e( 'Content tone', 'ai-seo-filler' ); ?></label></th>
+					<td>
+						<select id="ai_seo_filler_content_tone" name="<?php echo esc_attr( AI_SEO_FILLER_OPTION_PREFIX . 'content_tone' ); ?>">
+							<?php foreach ( array( 'commercial' => __( 'Commercial', 'ai-seo-filler' ), 'technical' => __( 'Technical', 'ai-seo-filler' ), 'neutral' => __( 'Neutral', 'ai-seo-filler' ) ) as $val => $lbl ) : ?>
+								<option value="<?php echo esc_attr( $val ); ?>" <?php selected( Settings::get_content_tone(), $val ); ?>><?php echo esc_html( $lbl ); ?></option>
+							<?php endforeach; ?>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<th><label for="ai_seo_filler_bulk_rate_limit"><?php esc_html_e( 'Bulk rate limit (seconds/item)', 'ai-seo-filler' ); ?></label></th>
+					<td><input type="number" min="0" max="60" id="ai_seo_filler_bulk_rate_limit" name="<?php echo esc_attr( AI_SEO_FILLER_OPTION_PREFIX . 'bulk_rate_limit' ); ?>" value="<?php echo esc_attr( Settings::get_bulk_rate_limit() ); ?>" class="small-text" /></td>
+				</tr>
+			</table>
+			<p>
+				<button type="button" class="button ai-seo-filler-test-api"><?php esc_html_e( 'Test API Connection', 'ai-seo-filler' ); ?></button>
+				<span id="ai-seo-filler-test-result" class="description"></span>
+			</p>
+		</div>
+
 		<table class="form-table" role="presentation">
 			<tr>
 				<th scope="row">
 					<label for="ai_seo_filler_language"><?php esc_html_e( 'Content Language', 'ai-seo-filler' ); ?></label>
 				</th>
 				<td>
-					<input
-						type="text"
+					<select
 						id="ai_seo_filler_language"
 						name="<?php echo esc_attr( AI_SEO_FILLER_OPTION_PREFIX . 'language' ); ?>"
-						value="<?php echo esc_attr( $current_lang ); ?>"
-						class="regular-text"
-						placeholder="en_US"
-					/>
+					>
+						<?php foreach ( $content_languages as $locale => $label ) : ?>
+							<option value="<?php echo esc_attr( $locale ); ?>" <?php selected( $current_lang, $locale ); ?>>
+								<?php echo esc_html( $label . ' (' . $locale . ')' ); ?>
+							</option>
+						<?php endforeach; ?>
+					</select>
 					<p class="description">
-						<?php esc_html_e( 'Locale code used to instruct the AI (e.g. en_US, es_ES). Defaults to your WordPress locale.', 'ai-seo-filler' ); ?>
+						<?php esc_html_e( 'Language used by the AI for generated SEO content, descriptions, and image metadata.', 'ai-seo-filler' ); ?>
 					</p>
 				</td>
 			</tr>
