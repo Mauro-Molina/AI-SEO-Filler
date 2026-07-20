@@ -43,6 +43,7 @@ class Core {
 		add_action( 'wp_ajax_ai_seo_filler_generate_images', array( $this, 'ajax_generate_images' ) );
 		add_action( 'wp_ajax_ai_seo_filler_apply_images', array( $this, 'ajax_apply_images' ) );
 		add_action( 'wp_ajax_ai_seo_filler_discard_images', array( $this, 'ajax_discard_images' ) );
+		add_action( 'wp_ajax_ai_seo_filler_undo', array( $this, 'ajax_undo' ) );
 		add_action( 'wp_ajax_ai_seo_filler_test_api', array( $this, 'ajax_test_api' ) );
 		add_action( 'wp_ajax_ai_seo_filler_save_openai_key', array( $this, 'ajax_save_openai_key' ) );
 		add_action( 'wp_ajax_ai_seo_filler_test_openai_key', array( $this, 'ajax_test_openai_key' ) );
@@ -55,7 +56,42 @@ class Core {
 	}
 
 	public function load_textdomain() {
-		load_plugin_textdomain( 'ai-seo-filler', false, dirname( AI_SEO_FILLER_PLUGIN_BASENAME ) . '/languages' );
+		add_filter( 'load_textdomain_mofile', array( $this, 'filter_textdomain_mofile' ), 10, 2 );
+
+		load_plugin_textdomain(
+			'ai-seo-filler',
+			false,
+			dirname( AI_SEO_FILLER_PLUGIN_BASENAME ) . '/languages'
+		);
+	}
+
+	/**
+	 * Falls back to es_ES for other Spanish locales when a specific MO is missing.
+	 *
+	 * @param string $mofile Path to the .mo file.
+	 * @param string $domain Text domain.
+	 * @return string
+	 */
+	public function filter_textdomain_mofile( $mofile, $domain ) {
+		if ( 'ai-seo-filler' !== $domain ) {
+			return $mofile;
+		}
+
+		if ( is_readable( $mofile ) ) {
+			return $mofile;
+		}
+
+		$locale = determine_locale();
+
+		if ( 0 === strpos( $locale, 'es_' ) && 'es_ES' !== $locale ) {
+			$fallback = AI_SEO_FILLER_PLUGIN_DIR . 'languages/ai-seo-filler-es_ES.mo';
+
+			if ( is_readable( $fallback ) ) {
+				return $fallback;
+			}
+		}
+
+		return $mofile;
 	}
 
 	public static function detect_seo_plugin() {
@@ -264,6 +300,7 @@ class Core {
 				'provider'    => $result['provider'] ?? '',
 				'is_product'  => ! empty( $result['is_product'] ),
 				'editor'      => $result['editor'] ?? array(),
+				'can_undo'    => History::can_undo( $post_id ),
 			)
 		);
 	}
@@ -286,6 +323,38 @@ class Core {
 		}
 
 		wp_send_json_success( array( 'message' => __( 'Staged images discarded.', 'ai-seo-filler' ) ) );
+	}
+
+	/**
+	 * AJAX: undo the last SEO or image apply for a post.
+	 */
+	public function ajax_undo() {
+		$post_id = $this->verify_editor_request();
+
+		if ( is_wp_error( $post_id ) ) {
+			wp_send_json_error( array( 'message' => $post_id->get_error_message() ), 400 );
+		}
+
+		$result = History::undo_last( $post_id );
+
+		if ( is_wp_error( $result ) ) {
+			wp_send_json_error( array( 'message' => $result->get_error_message() ), 400 );
+		}
+
+		$type    = $result['type'] ?? 'seo';
+		$message = 'images' === $type
+			? __( 'Images restored to the previous state.', 'ai-seo-filler' )
+			: __( 'Previous SEO state restored.', 'ai-seo-filler' );
+
+		wp_send_json_success(
+			array_merge(
+				$result,
+				array(
+					'message'  => $message,
+					'can_undo' => History::can_undo( $post_id ),
+				)
+			)
+		);
 	}
 
 	/**
@@ -423,6 +492,7 @@ class Core {
 	 */
 	public function apply_seo_data( $post_id, $seo_data, $args = array() ) {
 		$seo_data = $this->filter_by_settings( $seo_data, $args );
+		$seo_data = AI_Content::enforce_rankmath_rules( $seo_data );
 		$seo_plugin = self::detect_seo_plugin();
 
 		if ( 'none' === $seo_plugin ) {
@@ -430,6 +500,8 @@ class Core {
 		}
 
 		Backup::maybe_create_revision( $post_id );
+
+		$before = History::capture_before_seo( $post_id, $seo_data );
 
 		if ( Settings::should_generate_meta() ) {
 			if ( 'rankmath' === $seo_plugin ) {
@@ -442,7 +514,9 @@ class Core {
 		$post_updates = array( 'ID' => $post_id );
 
 		if ( Settings::should_generate_slug() && ! empty( $seo_data['slug'] ) ) {
-			$post_updates['post_name'] = sanitize_title( $seo_data['slug'] );
+			$keyword = AI_Content::primary_focus_keyword( $seo_data['focus_keyword'] ?? '' );
+			$post_updates['post_name'] = AI_Content::ensure_slug_has_keyword( $seo_data['slug'], $keyword );
+			$seo_data['slug']          = $post_updates['post_name'];
 		}
 
 		if ( Settings::should_generate_content() && ! empty( $seo_data['optimized_content'] ) ) {
@@ -460,7 +534,15 @@ class Core {
 			) );
 		}
 
-		History::record( $post_id, $seo_data, array( 'mode' => $args['mode'] ?? 'full' ) );
+		History::record(
+			$post_id,
+			$seo_data,
+			array(
+				'mode'   => $args['mode'] ?? 'full',
+				'action' => 'apply_seo',
+				'before' => $before,
+			)
+		);
 
 		/**
 		 * Fires after SEO data is saved to a post.
@@ -514,6 +596,7 @@ class Core {
 			'editorMeta' => $editor_meta,
 			'seoPlugin'  => $seo_plugin,
 			'checklist'  => SEO_Checker::build_checklist( $result, $post_id ),
+			'can_undo'   => History::can_undo( $post_id ),
 		) );
 	}
 
@@ -535,6 +618,10 @@ class Core {
 
 		if ( ! current_user_can( 'edit_post', $post_id ) ) {
 			return new \WP_Error( 'forbidden', __( 'You cannot edit this post.', 'ai-seo-filler' ) );
+		}
+
+		if ( ! Settings::is_post_type_enabled( get_post_type( $post_id ) ) ) {
+			return new \WP_Error( 'unsupported_type', __( 'This content type is not enabled in AI SEO Filler settings.', 'ai-seo-filler' ) );
 		}
 
 		return $post_id;

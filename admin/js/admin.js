@@ -60,6 +60,7 @@
 			ai_seo_filler_apply:           cfg.i18n.applying,
 			ai_seo_filler_generate_images: cfg.i18n.generatingImages,
 			ai_seo_filler_apply_images:    cfg.i18n.imagesApplying,
+			ai_seo_filler_undo:            cfg.i18n.undoing,
 			ai_seo_filler_test_api:        cfg.i18n.testing,
 			ai_seo_filler_start_bulk:      cfg.i18n.processing,
 			ai_seo_filler_pause_bulk:      cfg.i18n.pausing,
@@ -276,7 +277,7 @@
 	}
 
 	function setFieldBySelectors( selectors, value ) {
-		if ( ! value && value !== 0 ) {
+		if ( value === null || typeof value === 'undefined' ) {
 			return false;
 		}
 
@@ -306,7 +307,7 @@
 	}
 
 	function setEditorHtml( editorId, html ) {
-		if ( ! html ) {
+		if ( html === null || typeof html === 'undefined' ) {
 			return false;
 		}
 
@@ -439,7 +440,47 @@
 			window.rankMathEditor.refresh( 'description' );
 			window.rankMathEditor.refresh( 'keyword' );
 			window.rankMathEditor.refresh( 'content' );
+			window.rankMathEditor.refresh( 'permalink' );
 		}
+	}
+
+	/**
+	 * Syncs the post slug into Rank Math's analyzer.
+	 *
+	 * Rank Math scores "Focus Keyword in URL" from dataCollector._data.permalink
+	 * (classic: #post_name; block: core/editor slug), not from Redux serpSlug alone.
+	 * updatePermalink → handleSlugChange updates that cache; updateSerpSlug only paints the SERP UI.
+	 *
+	 * @param {string} slug Sanitized post slug.
+	 * @return {boolean} Whether any Rank Math slug API was called.
+	 */
+	function applySlugToRankMath( slug ) {
+		if ( ! slug || typeof slug !== 'string' ) {
+			return false;
+		}
+
+		var synced = false;
+		var dispatch = getRankMathDispatch();
+
+		// Preferred: updates dataCollector cache + editor slug field.
+		if ( window.rankMathEditor && typeof window.rankMathEditor.updatePermalink === 'function' ) {
+			window.rankMathEditor.updatePermalink( slug, true );
+			synced = true;
+		} else if ( dispatch && typeof dispatch.updatePermalink === 'function' ) {
+			dispatch.updatePermalink( slug );
+			synced = true;
+		}
+
+		if ( dispatch && typeof dispatch.updateSerpSlug === 'function' ) {
+			dispatch.updateSerpSlug( slug );
+			synced = true;
+		}
+
+		if ( window.rankMathEditor && typeof window.rankMathEditor.refresh === 'function' ) {
+			window.rankMathEditor.refresh( 'permalink' );
+		}
+
+		return synced;
 	}
 
 	var rankMathPreviewActive = false;
@@ -545,8 +586,8 @@
 			applySeoToRankMathTagify( snapshot.keywords );
 		}
 
-		if ( snapshot.slug && typeof dispatch.updateSerpSlug === 'function' ) {
-			dispatch.updateSerpSlug( snapshot.slug );
+		if ( snapshot.slug ) {
+			applySlugToRankMath( snapshot.slug );
 		}
 
 		if ( typeof dispatch.refreshResults === 'function' ) {
@@ -578,6 +619,18 @@
 
 			if ( seoData.slug ) {
 				data.slug = seoData.slug;
+
+				// Rank Math keyword-in-URL test reads data.permalink, not data.slug.
+				if ( window.rankMath && rankMath.permalinkFormat ) {
+					data.permalink = String( rankMath.permalinkFormat ).replace(
+						/%(postname|pagename|term|author)%/,
+						seoData.slug
+					);
+				} else if ( data.permalink && typeof data.permalink === 'string' ) {
+					data.permalink = data.permalink.replace( /[^/]+\/?$/, seoData.slug + '/' );
+				} else {
+					data.permalink = seoData.slug;
+				}
 			}
 
 			if ( seoData.meta_description ) {
@@ -792,7 +845,7 @@
 	}
 
 	function applySeoToRankMathTagify( keyword ) {
-		if ( ! keyword ) {
+		if ( keyword === null || typeof keyword === 'undefined' ) {
 			return false;
 		}
 
@@ -803,7 +856,8 @@
 		}
 
 		tagsEl.tagify.removeAllTags();
-		keyword.split( ',' ).forEach( function ( part ) {
+
+		String( keyword ).split( ',' ).forEach( function ( part ) {
 			part = part.trim();
 			if ( part ) {
 				tagsEl.tagify.addTags( part );
@@ -821,61 +875,65 @@
 		}
 
 		var synced  = false;
-		var title   = editorMeta.rank_math_title || '';
-		var desc    = editorMeta.rank_math_description || '';
-		var keyword = editorMeta.rank_math_focus_keyword || ( seoData && seoData.focus_keyword ) || '';
+		var hasKey  = function ( key ) {
+			return Object.prototype.hasOwnProperty.call( editorMeta, key );
+		};
+		var title   = hasKey( 'rank_math_title' ) ? ( editorMeta.rank_math_title || '' ) : null;
+		var desc    = hasKey( 'rank_math_description' ) ? ( editorMeta.rank_math_description || '' ) : null;
+		var keyword = hasKey( 'rank_math_focus_keyword' )
+			? ( editorMeta.rank_math_focus_keyword || '' )
+			: ( ( seoData && seoData.focus_keyword ) || null );
 
-		if ( title && typeof dispatch.updateTitle === 'function' ) {
+		if ( title !== null && typeof dispatch.updateTitle === 'function' ) {
 			dispatch.updateTitle( title );
 			synced = true;
 		}
 
-		if ( title && typeof dispatch.updateSerpTitle === 'function' ) {
+		if ( title !== null && typeof dispatch.updateSerpTitle === 'function' ) {
 			dispatch.updateSerpTitle( title );
 			synced = true;
 		}
 
-		if ( desc && typeof dispatch.updateDescription === 'function' ) {
+		if ( desc !== null && typeof dispatch.updateDescription === 'function' ) {
 			dispatch.updateDescription( desc );
 			synced = true;
 		}
 
-		if ( desc && typeof dispatch.updateSerpDescription === 'function' ) {
+		if ( desc !== null && typeof dispatch.updateSerpDescription === 'function' ) {
 			dispatch.updateSerpDescription( desc );
 			synced = true;
 		}
 
-		if ( keyword && typeof dispatch.updateKeywords === 'function' ) {
+		if ( keyword !== null && typeof dispatch.updateKeywords === 'function' ) {
 			dispatch.updateKeywords( keyword );
 			synced = true;
 		}
 
-		if ( seoData && seoData.slug && typeof dispatch.updateSerpSlug === 'function' ) {
-			dispatch.updateSerpSlug( seoData.slug );
+		if ( seoData && typeof seoData.slug === 'string' && applySlugToRankMath( seoData.slug ) ) {
 			synced = true;
 		}
 
-		if ( editorMeta.rank_math_facebook_title && typeof dispatch.updateFacebookTitle === 'function' ) {
-			dispatch.updateFacebookTitle( editorMeta.rank_math_facebook_title );
+		if ( hasKey( 'rank_math_facebook_title' ) && typeof dispatch.updateFacebookTitle === 'function' ) {
+			dispatch.updateFacebookTitle( editorMeta.rank_math_facebook_title || '' );
 			synced = true;
 		}
 
-		if ( editorMeta.rank_math_facebook_description && typeof dispatch.updateFacebookDescription === 'function' ) {
-			dispatch.updateFacebookDescription( editorMeta.rank_math_facebook_description );
+		if ( hasKey( 'rank_math_facebook_description' ) && typeof dispatch.updateFacebookDescription === 'function' ) {
+			dispatch.updateFacebookDescription( editorMeta.rank_math_facebook_description || '' );
 			synced = true;
 		}
 
-		if ( editorMeta.rank_math_twitter_title && typeof dispatch.updateTwitterTitle === 'function' ) {
-			dispatch.updateTwitterTitle( editorMeta.rank_math_twitter_title );
+		if ( hasKey( 'rank_math_twitter_title' ) && typeof dispatch.updateTwitterTitle === 'function' ) {
+			dispatch.updateTwitterTitle( editorMeta.rank_math_twitter_title || '' );
 			synced = true;
 		}
 
-		if ( editorMeta.rank_math_twitter_description && typeof dispatch.updateTwitterDescription === 'function' ) {
-			dispatch.updateTwitterDescription( editorMeta.rank_math_twitter_description );
+		if ( hasKey( 'rank_math_twitter_description' ) && typeof dispatch.updateTwitterDescription === 'function' ) {
+			dispatch.updateTwitterDescription( editorMeta.rank_math_twitter_description || '' );
 			synced = true;
 		}
 
-		if ( applySeoToRankMathTagify( keyword ) ) {
+		if ( keyword !== null && applySeoToRankMathTagify( keyword ) ) {
 			synced = true;
 		}
 
@@ -899,7 +957,7 @@
 
 		var synced = false;
 
-		if ( seoData.slug ) {
+		if ( typeof seoData.slug === 'string' ) {
 			if ( setFieldBySelectors( [ '#post_name', '#new-post-slug', 'input[name="post_name"]' ], seoData.slug ) ) {
 				synced = true;
 			}
@@ -912,15 +970,15 @@
 			}
 		}
 
-		if ( seoData.optimized_content && setEditorHtml( 'content', seoData.optimized_content ) ) {
+		if ( typeof seoData.optimized_content === 'string' && setEditorHtml( 'content', seoData.optimized_content ) ) {
 			synced = true;
 		}
 
-		if ( seoData.short_description && setEditorHtml( 'excerpt', seoData.short_description ) ) {
+		if ( typeof seoData.short_description === 'string' && setEditorHtml( 'excerpt', seoData.short_description ) ) {
 			synced = true;
 		}
 
-		if ( synced && ( seoData.optimized_content || seoData.short_description ) ) {
+		if ( synced && ( typeof seoData.optimized_content === 'string' || typeof seoData.short_description === 'string' ) ) {
 			refreshRankMathEditor();
 			var rmDispatch = getRankMathDispatch();
 			if ( rmDispatch && typeof rmDispatch.refreshResults === 'function' ) {
@@ -949,15 +1007,15 @@
 			edits.meta = Object.assign( {}, select.getEditedPostAttribute( 'meta' ) || {}, editorMeta );
 		}
 
-		if ( seoData && seoData.slug ) {
+		if ( seoData && typeof seoData.slug === 'string' ) {
 			edits.slug = seoData.slug;
 		}
 
-		if ( seoData && seoData.optimized_content ) {
+		if ( seoData && typeof seoData.optimized_content === 'string' ) {
 			edits.content = seoData.optimized_content;
 		}
 
-		if ( seoData && seoData.short_description ) {
+		if ( seoData && typeof seoData.short_description === 'string' ) {
 			edits.excerpt = seoData.short_description;
 		}
 
@@ -977,16 +1035,8 @@
 	function applySeoToEditor( seoData, editorMeta ) {
 		var synced = false;
 
-		// Rank Math React metabox (classic + block) — primary sync path.
-		if ( applySeoToRankMathStore( editorMeta, seoData ) ) {
-			synced = true;
-		}
-
+		// Slug must land in WP editor fields before Rank Math re-analyzes the URL.
 		if ( applySeoToBlockEditor( seoData, editorMeta ) ) {
-			synced = true;
-		}
-
-		if ( applySeoToRankMathClassic( editorMeta ) ) {
 			synced = true;
 		}
 
@@ -994,12 +1044,27 @@
 			synced = true;
 		}
 
-		// Rank Math may finish mounting after AJAX.
+		if ( applySeoToRankMathClassic( editorMeta ) ) {
+			synced = true;
+		}
+
+		// Rank Math React metabox (classic + block) — primary sync path.
+		if ( applySeoToRankMathStore( editorMeta, seoData ) ) {
+			synced = true;
+		}
+
+		// Rank Math may finish mounting after AJAX; re-push slug into dataCollector.
 		setTimeout( function () {
+			if ( seoData && seoData.slug ) {
+				applySlugToRankMath( seoData.slug );
+			}
 			applySeoToRankMathStore( editorMeta, seoData );
 		}, 150 );
 
 		setTimeout( function () {
+			if ( seoData && seoData.slug ) {
+				applySlugToRankMath( seoData.slug );
+			}
 			applySeoToRankMathStore( editorMeta, seoData );
 		}, 600 );
 
@@ -1229,9 +1294,11 @@
 				}
 				notifySuccess( message, $status );
 				refreshRankMathChecklist( payload.data || {}, payload.editorMeta, {
-					$container:        $status.siblings( '.ai-seo-filler-checklist' ),
+					$container:        $btn.closest( '.ai-seo-filler-metabox' ).find( '.ai-seo-filler-checklist' ),
 					fallbackChecklist: payload.checklist
 				} );
+				updateHistoryMeta( 'SEO' );
+				setUndoButtonEnabled( payload.can_undo !== false );
 			} )
 			.fail( function ( jqXHR ) {
 				notifyError( getAjaxErrorMessage( jqXHR, cfg.i18n.error ), $status );
@@ -1241,14 +1308,149 @@
 			} );
 	}
 
+	function setUndoButtonEnabled( enabled ) {
+		var $btn = $( '.ai-seo-filler-undo' );
+
+		if ( ! $btn.length ) {
+			return;
+		}
+
+		$btn.prop( 'disabled', ! enabled );
+		$btn.closest( '.ai-seo-filler-history' ).find( '.ai-seo-filler-history__hint' ).toggle( ! enabled );
+	}
+
+	function updateHistoryMeta( label ) {
+		var $meta = $( '.ai-seo-filler-history__meta' );
+		var now = new Date();
+		var stamp = now.getUTCFullYear() + '-' +
+			String( now.getUTCMonth() + 1 ).padStart( 2, '0' ) + '-' +
+			String( now.getUTCDate() ).padStart( 2, '0' ) + ' ' +
+			String( now.getUTCHours() ).padStart( 2, '0' ) + ':' +
+			String( now.getUTCMinutes() ).padStart( 2, '0' );
+
+		if ( ! $meta.length ) {
+			var $history = $( '.ai-seo-filler-history' );
+
+			if ( ! $history.length ) {
+				return;
+			}
+
+			$meta = $( '<p class="description ai-seo-filler-history__meta"></p>' );
+			$history.prepend( $meta );
+		}
+
+		$meta.html(
+			'<strong>' + escapeHtml( ( cfg.i18n && cfg.i18n.lastRun ) || 'Last run:' ) + '</strong> ' +
+			escapeHtml( stamp ) +
+			( label ? ' <span class="ai-seo-filler-history__type">(' + escapeHtml( label ) + ')</span>' : '' )
+		);
+	}
+
 	$( document ).on( 'click', '.ai-seo-filler-generate', function () {
 		var $btn = $( this );
-		runGenerate( $btn.data( 'post-id' ), $btn.data( 'mode' ) || 'full', $btn, $btn.siblings( '.ai-seo-filler-status' ) );
+		var $status = $btn.closest( '.ai-seo-filler-metabox' ).find( '.ai-seo-filler-status' );
+		runGenerate( $btn.data( 'post-id' ), $btn.data( 'mode' ) || 'full', $btn, $status );
 	} );
 
 	$( document ).on( 'click', '.ai-seo-filler-generate-meta', function () {
 		var $btn = $( this );
-		runGenerate( $btn.data( 'post-id' ), 'meta_only', $btn, $btn.siblings( '.ai-seo-filler-status' ) );
+		var $status = $btn.closest( '.ai-seo-filler-metabox' ).find( '.ai-seo-filler-status' );
+		var thin = parseInt( $btn.data( 'thin-content' ), 10 ) === 1 || !! cfg.thinContent;
+
+		if ( thin ) {
+			var confirmMsg = ( cfg.i18n && cfg.i18n.thinContentConfirm )
+				? cfg.i18n.thinContentConfirm
+				: 'This item has little body content. Meta only will not fix Rank Math content tests. Continue anyway?';
+
+			if ( ! window.confirm( confirmMsg ) ) {
+				return;
+			}
+		}
+
+		runGenerate( $btn.data( 'post-id' ), 'meta_only', $btn, $status );
+	} );
+
+	$( document ).on( 'click', '.ai-seo-filler-undo', function () {
+		var $btn = $( this );
+		var postId = $btn.data( 'post-id' );
+		var $metabox = $btn.closest( '.ai-seo-filler-metabox' );
+		var $row = $btn.closest( 'tr[data-post-id]' );
+		var onHistoryPage = $btn.closest( '.ai-seo-filler-history-page' ).length > 0;
+		var $status = $metabox.length ? $metabox.find( '.ai-seo-filler-status' ) : null;
+		var confirmMsg = ( cfg.i18n && cfg.i18n.undoConfirm )
+			? cfg.i18n.undoConfirm
+			: 'Undo the last AI SEO Filler apply?';
+
+		if ( $btn.prop( 'disabled' ) ) {
+			return;
+		}
+
+		if ( ! window.confirm( confirmMsg ) ) {
+			return;
+		}
+
+		$btn.prop( 'disabled', true );
+
+		if ( $status && $status.length ) {
+			setStatus( $status, 'loading', cfg.i18n.undoing || 'Restoring…' );
+		}
+
+		aiSeoPost( {
+			action:  'ai_seo_filler_undo',
+			nonce:   cfg.nonce,
+			post_id: postId
+		} )
+			.done( function ( response ) {
+				if ( ! response.success ) {
+					var errMsg = ( response.data && response.data.message ) ? response.data.message : cfg.i18n.error;
+					notifyError( errMsg, $status );
+					$btn.prop( 'disabled', false );
+					if ( ! onHistoryPage ) {
+						setUndoButtonEnabled( true );
+					}
+					return;
+				}
+
+				var payload = response.data || {};
+				var message = payload.message || cfg.i18n.undoSuccess || cfg.i18n.success;
+
+				if ( onHistoryPage ) {
+					if ( $row.length ) {
+						$row.addClass( 'is-undone' );
+						$row.find( '.ai-seo-filler-badge' )
+							.removeClass( 'ai-seo-filler-badge--ok' )
+							.addClass( 'ai-seo-filler-badge--warn' )
+							.text( ( cfg.i18n && cfg.i18n.undoneLabel ) || 'Undone' );
+						$btn.remove();
+					}
+					$( '.ai-seo-filler-history-table tr[data-post-id="' + postId + '"] .ai-seo-filler-undo' ).remove();
+					notifySuccess( message, null );
+					return;
+				}
+
+				if ( payload.type === 'images' ) {
+					syncProductEditorImages( payload );
+				} else {
+					var $checklist = $metabox.find( '.ai-seo-filler-checklist' );
+					applySeoToEditor( payload.data || {}, payload.editorMeta || {} );
+					refreshRankMathChecklist( payload.data || {}, payload.editorMeta || {}, {
+						$container:        $checklist,
+						fallbackChecklist: payload.checklist,
+						afterApply:        true
+					} );
+				}
+
+				updateHistoryMeta( ( cfg.i18n && cfg.i18n.undoneLabel ) || 'Undone' );
+				setUndoButtonEnabled( !! payload.can_undo );
+				notifySuccess( message, $status );
+			} )
+			.fail( function ( jqXHR ) {
+				notifyError( getAjaxErrorMessage( jqXHR, cfg.i18n.error ), $status );
+				$btn.prop( 'disabled', false );
+				if ( ! onHistoryPage ) {
+					setUndoButtonEnabled( true );
+				}
+			} );
 	} );
 
 	$( document ).on( 'click', '.ai-seo-filler-generate-images', function () {
@@ -1420,6 +1622,7 @@
 		var $postImage = $( '#postimagediv .inside' );
 		var $galleryInput = $( '#product_image_gallery' );
 		var $galleryList = $( '#product_images_container ul.product_images' );
+		var hasFeaturedKey = !!( payload && ( Object.prototype.hasOwnProperty.call( payload, 'featured_id' ) || ( editor && Object.prototype.hasOwnProperty.call( editor, 'featured_id' ) ) ) );
 
 		if ( featuredId ) {
 			if ( $thumbInput.length ) {
@@ -1450,6 +1653,22 @@
 
 			if ( typeof window.WPSetThumbnailID === 'function' ) {
 				window.WPSetThumbnailID( featuredId );
+			}
+		} else if ( hasFeaturedKey ) {
+			if ( $thumbInput.length ) {
+				$thumbInput.val( '-1' );
+			}
+
+			if ( $postImage.length ) {
+				var setLabel = ( editor && editor.set_label ) ? editor.set_label : 'Set product image';
+				$postImage.html(
+					'<p class="hide-if-no-js"><a href="#" id="set-post-thumbnail">' + escapeHtml( setLabel ) + '</a></p>' +
+					'<input type="hidden" id="_thumbnail_id" name="_thumbnail_id" value="-1" />'
+				);
+			}
+
+			if ( typeof window.WPSetThumbnailID === 'function' ) {
+				window.WPSetThumbnailID( -1 );
 			}
 		}
 
@@ -1566,6 +1785,8 @@
 				}
 
 				notifySuccess( message, $status );
+				updateHistoryMeta( ( cfg.i18n && cfg.i18n.imagesLabel ) || 'Images' );
+				setUndoButtonEnabled( payload.can_undo !== false );
 			} )
 			.fail( function ( jqXHR ) {
 				notifyError( getAjaxErrorMessage( jqXHR, cfg.i18n.error ), $status );
@@ -1640,11 +1861,13 @@
 				notifySuccess( message, $status );
 
 				refreshRankMathChecklist( payload.data || {}, payload.editorMeta, {
-					$container:        $status.siblings( '.ai-seo-filler-checklist' ),
+					$container:        $status.closest( '.ai-seo-filler-metabox' ).find( '.ai-seo-filler-checklist' ),
 					fallbackChecklist: payload.checklist,
 					focusKeyword:      focusKeyword,
 					afterApply:        true
 				} );
+				updateHistoryMeta( 'SEO' );
+				setUndoButtonEnabled( payload.can_undo !== false );
 			} else {
 				notifyError( ( response.data && response.data.message ) ? response.data.message : cfg.i18n.error, $status );
 			}
@@ -1950,7 +2173,64 @@
 			startPolling();
 		}
 		initProviderPanels();
+		initSettingsTabs();
 	} );
+
+	function initSettingsTabs() {
+		var $page = $( '.ai-seo-filler-settings-page' );
+
+		if ( ! $page.length ) {
+			return;
+		}
+
+		var $tabs = $page.find( '.ai-seo-filler-settings-tabs .nav-tab' );
+		var $panels = $page.find( '.ai-seo-filler-tab-panel' );
+		var storageKey = 'aiSeoFillerSettingsTab';
+		var valid = {};
+
+		$panels.each( function () {
+			valid[ $( this ).data( 'tab' ) ] = true;
+		} );
+
+		function activateTab( tabId, pushHash ) {
+			if ( ! valid[ tabId ] ) {
+				tabId = 'providers';
+			}
+
+			$tabs.removeClass( 'nav-tab-active' ).attr( 'aria-selected', 'false' );
+			$panels.removeClass( 'is-active' ).attr( 'hidden', true );
+
+			$tabs.filter( '[data-tab="' + tabId + '"]' )
+				.addClass( 'nav-tab-active' )
+				.attr( 'aria-selected', 'true' );
+
+			$panels.filter( '[data-tab="' + tabId + '"]' )
+				.addClass( 'is-active' )
+				.removeAttr( 'hidden' );
+
+			try {
+				window.localStorage.setItem( storageKey, tabId );
+			} catch ( e ) { /* ignore */ }
+
+			if ( false !== pushHash && window.history && window.history.replaceState ) {
+				window.history.replaceState( null, '', '#' + tabId );
+			}
+		}
+
+		$tabs.on( 'click', function ( event ) {
+			event.preventDefault();
+			activateTab( $( this ).data( 'tab' ), true );
+		} );
+
+		var fromHash = ( window.location.hash || '' ).replace( /^#/, '' ).replace( /^ai-seo-tab-/, '' );
+		var fromStorage = '';
+
+		try {
+			fromStorage = window.localStorage.getItem( storageKey ) || '';
+		} catch ( e ) { /* ignore */ }
+
+		activateTab( fromHash || fromStorage || 'providers', !! fromHash );
+	}
 
 	function initProviderPanels() {
 		var $select = $( '#ai_seo_filler_ai_provider' );

@@ -176,6 +176,8 @@ class AI_Images {
 			$gallery_ids = array_values( array_diff( $allowed, array( $featured_id ) ) );
 		}
 
+		$before = History::capture_before_images( $post_id, $is_product );
+
 		if ( $is_product ) {
 			$assigned = WooCommerce::assign_product_images( $post_id, $featured_id, $gallery_ids );
 
@@ -205,6 +207,7 @@ class AI_Images {
 				'provider' => $staged['provider'] ?? '',
 				'featured' => $featured_id,
 				'gallery'  => $gallery_ids,
+				'before'   => $before,
 			)
 		);
 
@@ -234,6 +237,27 @@ class AI_Images {
 			'is_product'  => $is_product,
 			'editor'      => self::build_editor_sync_payload( $featured_id, $gallery_ids ),
 		);
+	}
+
+	/**
+	 * Public wrapper for editor sync payload (used by undo).
+	 *
+	 * @param int   $featured_id Featured attachment ID.
+	 * @param int[] $gallery_ids Gallery attachment IDs.
+	 * @return array<string, mixed>
+	 */
+	public static function get_editor_sync_payload( $featured_id, $gallery_ids ) {
+		return self::build_editor_sync_payload( $featured_id, $gallery_ids );
+	}
+
+	/**
+	 * Public wrapper for image summary rows (used by undo).
+	 *
+	 * @param int[] $attachment_ids Attachment IDs.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public static function format_images_for_response( $attachment_ids ) {
+		return self::format_images_summary( $attachment_ids );
 	}
 
 	/**
@@ -281,6 +305,7 @@ class AI_Images {
 			'gallery'        => $gallery,
 			'remove_label'   => __( 'Remove product image', 'woocommerce' ),
 			'delete_label'   => __( 'Delete', 'woocommerce' ),
+			'set_label'      => __( 'Set product image', 'woocommerce' ),
 		);
 	}
 

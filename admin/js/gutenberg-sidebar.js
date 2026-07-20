@@ -27,6 +27,16 @@
 		var setStatus = status[1];
 
 		function generate( mode ) {
+			if ( mode === 'meta_only' && cfg.thinContent ) {
+				var confirmMsg = ( cfg.i18n && cfg.i18n.thinContentConfirm )
+					? cfg.i18n.thinContentConfirm
+					: 'This item has little body content. Meta only will not fix Rank Math content tests. Continue anyway?';
+
+				if ( ! window.confirm( confirmMsg ) ) {
+					return;
+				}
+			}
+
 			var loadingMsg = cfg.i18n.generating || 'Generating…';
 
 			setStatus( loadingMsg );
@@ -77,11 +87,37 @@
 			PluginSidebar,
 			{ name: 'ai-seo-filler-sidebar', title: 'AI SEO Filler', icon: 'search' },
 			el( PanelBody, { initialOpen: true },
-				el( Button, { variant: 'primary', onClick: function () { generate( 'full' ); } }, cfg.i18n.generating ? 'Generate all SEO' : 'Generate' ),
+				cfg.thinContent
+					? el(
+						'p',
+						{
+							className: 'ai-seo-filler-metabox-notice',
+							style: {
+								margin: '0 0 10px',
+								padding: '8px 10px',
+								borderLeft: '3px solid #dba617',
+								background: '#fcf9e8',
+								fontSize: '12px',
+								lineHeight: '1.45',
+								color: '#664d03'
+							}
+						},
+						( cfg.i18n && cfg.i18n.thinContentWarning )
+							? cfg.i18n.thinContentWarning
+							: 'Little body content detected. Prefer Generate all SEO for Rank Math content tests.'
+					)
+					: null,
+				el( Button, {
+					variant: 'primary',
+					onClick: function () { generate( 'full' ); }
+				}, ( cfg.i18n && cfg.i18n.generateAll ) || 'Generate all SEO' ),
 				el( 'div', { style: { marginTop: '8px' } },
-					el( Button, { variant: 'secondary', onClick: function () { generate( 'meta_only' ); } }, 'Meta only' )
+					el( Button, {
+						variant: 'secondary',
+						onClick: function () { generate( 'meta_only' ); }
+					}, ( cfg.i18n && cfg.i18n.metaOnly ) || 'Meta only' )
 				),
-				status[0] ? el( 'p', { className: 'ai-seo-filler-sidebar-status is-loading', style: { marginTop: '10px', fontSize: '12px' } }, status[0] ) : null
+				status[0] ? el( 'p', { className: 'ai-seo-filler-sidebar-status', style: { marginTop: '10px', fontSize: '12px' } }, status[0] ) : null
 			)
 		);
 	}

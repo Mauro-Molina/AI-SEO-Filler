@@ -90,6 +90,11 @@ class CLI {
 		}
 
 		$post_type = sanitize_text_field( $assoc_args['post-type'] );
+
+		if ( ! Settings::is_post_type_enabled( $post_type ) ) {
+			\WP_CLI::error( 'Post type is not enabled in AI SEO Filler settings: ' . $post_type );
+		}
+
 		$post_ids  = get_posts(
 			array(
 				'post_type'      => $post_type,

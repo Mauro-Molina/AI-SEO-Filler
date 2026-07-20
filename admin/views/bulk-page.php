@@ -12,11 +12,11 @@ use AiSeoFiller\Core;
 use AiSeoFiller\Settings;
 
 $allowed_types = Bulk::get_allowed_post_types();
-$type_labels   = array(
-	'post'    => __( 'Posts', 'ai-seo-filler' ),
-	'page'    => __( 'Pages', 'ai-seo-filler' ),
-	'product' => __( 'Products', 'ai-seo-filler' ),
-);
+$type_labels   = array();
+
+foreach ( $allowed_types as $type ) {
+	$type_labels[ $type ] = Settings::get_post_type_label( $type );
+}
 
 $status_labels = array(
 	'publish' => __( 'Published', 'ai-seo-filler' ),
@@ -47,6 +47,7 @@ $product_cats = taxonomy_exists( 'product_cat' ) ? get_terms( array( 'taxonomy' 
 		<p class="description">
 			<?php
 			printf(
+				/* translators: %d: bulk batch size */
 				esc_html__( 'Uses Action Scheduler when available, otherwise WP-Cron. Batch size: %d.', 'ai-seo-filler' ),
 				(int) AI_SEO_FILLER_BULK_BATCH_SIZE
 			);
@@ -129,7 +130,14 @@ $product_cats = taxonomy_exists( 'product_cat' ) ? get_terms( array( 'taxonomy' 
 				<h3><?php esc_html_e( 'Recent Errors', 'ai-seo-filler' ); ?></h3>
 				<ul>
 					<?php foreach ( $queue_status['error_log'] as $error ) : ?>
-						<li><?php printf( esc_html__( 'Post #%1$d: %2$s', 'ai-seo-filler' ), (int) $error['post_id'], esc_html( $error['message'] ) ); ?></li>
+						<li><?php
+						printf(
+							/* translators: 1: post ID, 2: error message */
+							esc_html__( 'Post #%1$d: %2$s', 'ai-seo-filler' ),
+							(int) $error['post_id'],
+							esc_html( $error['message'] )
+						);
+						?></li>
 					<?php endforeach; ?>
 				</ul>
 			</div>

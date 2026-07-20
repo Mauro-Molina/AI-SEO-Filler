@@ -48,7 +48,7 @@ class SEO_Checker {
 	 * @return array<int, array{label:string, pass:bool}>
 	 */
 	public static function build_checklist( $seo_data, $post_id = 0 ) {
-		$keyword    = trim( $seo_data['focus_keyword'] ?? '' );
+		$keyword    = AI_Content::primary_focus_keyword( $seo_data['focus_keyword'] ?? '' );
 		$min_words  = Settings::get_min_word_count( $post_id );
 		$content    = $seo_data['optimized_content'] ?? '';
 		$word_count = AI_Content::count_words( $content );
@@ -74,7 +74,7 @@ class SEO_Checker {
 			),
 			array(
 				'label' => __( 'Focus keyword used 3+ times in content', 'ai-seo-filler' ),
-				'pass'  => $keyword && self::keyword_count_in_content( $content, $keyword ) >= 3,
+				'pass'  => $keyword && AI_Content::count_keyword_occurrences( $content, $keyword ) >= 3,
 			),
 			array(
 				/* translators: %d: minimum word count */
@@ -148,9 +148,14 @@ class SEO_Checker {
 	 * @return bool
 	 */
 	private static function slug_has_keyword( $slug, $keyword ) {
-		$keyword_slug = sanitize_title( $keyword );
+		$slug = sanitize_title( (string) $slug );
 
-		return $keyword_slug && false !== strpos( $slug, $keyword_slug );
+		if ( '' === $slug || '' === trim( (string) $keyword ) ) {
+			return false;
+		}
+
+		// Passes when the current slug already satisfies Rank Math keyword-in-URL rules.
+		return AI_Content::ensure_slug_has_keyword( $slug, $keyword ) === $slug;
 	}
 
 	/**

@@ -276,8 +276,9 @@ class AI_Content {
 		$prompt .= "RULES:\n";
 		$prompt .= "- Return ONLY raw HTML (no JSON, no markdown fences).\n";
 		$prompt .= "- Use <p> for paragraphs and <h2>/<h3> for subheadings.\n";
-		$prompt .= "- First sentence MUST start with the focus keyword.\n";
-		$prompt .= "- Include the focus keyword at least 3 more times naturally.\n";
+		$prompt .= "- The VERY words of the first paragraph MUST be the exact focus keyword.\n";
+		$prompt .= "- Include the exact focus keyword at least 3 times in the body (opening + 2 more natural uses).\n";
+		$prompt .= "- Do not bury the focus keyword; Rank Math requires it near the start of the content.\n";
 		$prompt .= "- Write at least {$min} words. Expand with features, benefits, FAQs.\n";
 		$prompt .= self::build_tone_section();
 
@@ -421,10 +422,11 @@ class AI_Content {
 		$rules .= "1. Choose focus_keyword FIRST. Every other field MUST be built around that exact phrase.\n";
 		$rules .= "2. meta_title MUST include the exact focus_keyword, preferably at the very beginning. Max 60 characters.\n";
 		$rules .= "3. meta_description MUST include the exact focus_keyword naturally in the first sentence. Max 160 characters.\n";
-		$rules .= "4. slug MUST contain the significant words from focus_keyword as lowercase hyphenated segments.\n";
+		$rules .= "4. slug MUST be the focus_keyword as a lowercase hyphenated URL slug (e.g. \"zapatillas running\" → \"zapatillas-running\").\n";
 		$rules .= "5. optimized_content and short_description are generated in a separate step — leave both empty in this JSON.\n";
 		$rules .= "6. og_title and og_description MUST also include the focus_keyword.\n";
 		$rules .= "7. Each image alt in image_alts SHOULD include the focus_keyword when it reads naturally.\n";
+		$rules .= "8. Use a single primary focus_keyword phrase (no comma-separated list).\n";
 
 		return $rules;
 	}
@@ -484,16 +486,20 @@ class AI_Content {
 	 * @return array
 	 */
 	public static function enforce_rankmath_rules( $seo_data ) {
-		$keyword = trim( $seo_data['focus_keyword'] ?? '' );
+		// Rank Math scores against the primary focus keyword (before any comma).
+		$raw_keyword = trim( (string) ( $seo_data['focus_keyword'] ?? '' ) );
+		$keyword     = self::primary_focus_keyword( $raw_keyword );
 
 		if ( '' === $keyword ) {
 			return $seo_data;
 		}
 
+		$seo_data['focus_keyword'] = $keyword;
+
 		if ( ! self::contains_keyword( $seo_data['meta_title'] ?? '', $keyword ) ) {
 			$seo_data['meta_title'] = self::trim_to_length( $keyword . ' | ' . ( $seo_data['meta_title'] ?? '' ), 60 );
-		} elseif ( 0 !== stripos( $seo_data['meta_title'], $keyword ) ) {
-			$remainder = trim( preg_replace( '/\b' . preg_quote( $keyword, '/' ) . '\b/ui', '', $seo_data['meta_title'] ) );
+		} elseif ( 0 !== stripos( ltrim( (string) $seo_data['meta_title'] ), $keyword ) ) {
+			$remainder = trim( preg_replace( '/' . preg_quote( $keyword, '/' ) . '/ui', '', $seo_data['meta_title'], 1 ) );
 			$remainder = trim( preg_replace( '/^[|\-–—:\s]+|[|\-–—:\s]+$/u', '', $remainder ) );
 			$seo_data['meta_title'] = self::trim_to_length( $keyword . ( $remainder ? ' | ' . $remainder : '' ), 60 );
 		}
@@ -502,12 +508,7 @@ class AI_Content {
 			$seo_data['meta_description'] = self::trim_to_length( $keyword . '. ' . ( $seo_data['meta_description'] ?? '' ), 160 );
 		}
 
-		$keyword_slug = sanitize_title( $keyword );
-		$current_slug = $seo_data['slug'] ?? '';
-
-		if ( $keyword_slug && ! self::slug_contains_keyword( $current_slug, $keyword_slug ) ) {
-			$seo_data['slug'] = $keyword_slug;
-		}
+		$seo_data['slug'] = self::ensure_slug_has_keyword( $seo_data['slug'] ?? '', $keyword );
 
 		if ( ! self::contains_keyword( $seo_data['og_title'] ?? '', $keyword ) ) {
 			$seo_data['og_title'] = self::trim_to_length( $keyword . ' — ' . ( $seo_data['og_title'] ?? '' ), 70 );
@@ -517,11 +518,136 @@ class AI_Content {
 			$seo_data['og_description'] = self::trim_to_length( $keyword . '. ' . ( $seo_data['og_description'] ?? '' ), 200 );
 		}
 
-		if ( ! empty( $seo_data['optimized_content'] ) && ! self::contains_keyword( $seo_data['optimized_content'], $keyword ) ) {
-			$seo_data['optimized_content'] = '<p>' . esc_html( $keyword ) . '.</p>' . $seo_data['optimized_content'];
+		if ( ! empty( $seo_data['optimized_content'] ) ) {
+			$seo_data['optimized_content'] = self::ensure_keyword_in_content( $seo_data['optimized_content'], $keyword );
 		}
 
 		return $seo_data;
+	}
+
+	/**
+	 * Returns the primary focus keyword (first segment before a comma).
+	 *
+	 * @param string $keyword Raw focus keyword field.
+	 * @return string
+	 */
+	public static function primary_focus_keyword( $keyword ) {
+		$keyword = trim( (string) $keyword );
+
+		if ( '' === $keyword ) {
+			return '';
+		}
+
+		$parts = array_map( 'trim', explode( ',', $keyword ) );
+
+		return $parts[0] ?? '';
+	}
+
+	/**
+	 * Whether post content is too thin for Rank Math content tests.
+	 *
+	 * @param \WP_Post|int $post      Post object or ID.
+	 * @param int          $threshold Minimum words to consider sufficient.
+	 * @return bool
+	 */
+	public static function is_thin_content( $post, $threshold = 50 ) {
+		$post = get_post( $post );
+
+		if ( ! $post ) {
+			return true;
+		}
+
+		$words = self::count_words( $post->post_content );
+
+		return $words < max( 1, absint( $threshold ) );
+	}
+
+	/**
+	 * Ensures the slug contains the focus keyword (hyphenated).
+	 *
+	 * @param string $slug    Current slug.
+	 * @param string $keyword Focus keyword.
+	 * @return string
+	 */
+	public static function ensure_slug_has_keyword( $slug, $keyword ) {
+		$keyword_slug = sanitize_title( $keyword );
+		$slug         = sanitize_title( (string) $slug );
+
+		if ( '' === $keyword_slug ) {
+			return $slug;
+		}
+
+		if ( self::slug_contains_keyword( $slug, $keyword_slug ) ) {
+			return $slug;
+		}
+
+		// Prefer keyword slug; append leftover unique parts from the old slug if useful.
+		if ( '' === $slug || $slug === $keyword_slug ) {
+			return $keyword_slug;
+		}
+
+		$extra = trim( str_replace( $keyword_slug, '', $slug ), '-' );
+
+		if ( '' !== $extra && false === strpos( $keyword_slug, $extra ) ) {
+			return sanitize_title( $keyword_slug . '-' . $extra );
+		}
+
+		return $keyword_slug;
+	}
+
+	/**
+	 * Ensures keyword appears at the start of content and at least 3 times.
+	 *
+	 * @param string $html    HTML body.
+	 * @param string $keyword Focus keyword.
+	 * @return string
+	 */
+	public static function ensure_keyword_in_content( $html, $keyword ) {
+		$html    = (string) $html;
+		$keyword = trim( (string) $keyword );
+
+		if ( '' === $html || '' === $keyword ) {
+			return $html;
+		}
+
+		$plain = ltrim( wp_strip_all_tags( $html ) );
+		$start = function_exists( 'mb_substr' ) ? mb_substr( $plain, 0, 120 ) : substr( $plain, 0, 120 );
+
+		if ( ! self::contains_keyword( $start, $keyword ) ) {
+			$html = '<p>' . esc_html( $keyword ) . '.</p>' . "\n" . $html;
+		}
+
+		$min_occurrences = 3;
+		$occurrences     = self::count_keyword_occurrences( $html, $keyword );
+		$needed          = $min_occurrences - $occurrences;
+
+		for ( $i = 0; $i < $needed; $i++ ) {
+			$html .= "\n<p>" . esc_html( $keyword ) . '.</p>';
+		}
+
+		return $html;
+	}
+
+	/**
+	 * Counts case-insensitive occurrences of the keyword in HTML/text.
+	 *
+	 * @param string $html    HTML or plain text.
+	 * @param string $keyword Focus keyword.
+	 * @return int
+	 */
+	public static function count_keyword_occurrences( $html, $keyword ) {
+		$plain = function_exists( 'mb_strtolower' )
+			? mb_strtolower( wp_strip_all_tags( (string) $html ) )
+			: strtolower( wp_strip_all_tags( (string) $html ) );
+		$kw    = function_exists( 'mb_strtolower' )
+			? mb_strtolower( (string) $keyword )
+			: strtolower( (string) $keyword );
+
+		if ( '' === $kw ) {
+			return 0;
+		}
+
+		return substr_count( $plain, $kw );
 	}
 
 	/**
@@ -551,7 +677,30 @@ class AI_Content {
 			return false;
 		}
 
-		return false !== strpos( $slug, $keyword_slug );
+		if ( false !== strpos( $slug, $keyword_slug ) ) {
+			return true;
+		}
+
+		// Also pass when every significant keyword segment is present in the slug.
+		$parts = array_filter( explode( '-', $keyword_slug ) );
+		$parts = array_filter(
+			$parts,
+			static function ( $part ) {
+				return strlen( $part ) > 2;
+			}
+		);
+
+		if ( empty( $parts ) ) {
+			return false;
+		}
+
+		foreach ( $parts as $part ) {
+			if ( false === strpos( $slug, $part ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**

@@ -49,11 +49,7 @@ class Bulk {
 	}
 
 	public static function get_allowed_post_types() {
-		$types = array( 'post', 'page' );
-		if ( class_exists( 'WooCommerce' ) ) {
-			$types[] = 'product';
-		}
-		return $types;
+		return Settings::get_enabled_post_types();
 	}
 
 	public function ajax_start_bulk() {
@@ -134,6 +130,7 @@ class Bulk {
 		$this->schedule_next_batch( 0 );
 
 		wp_send_json_success( array(
+			/* translators: %d: number of posts queued */
 			'message' => sprintf( __( '%d posts queued for processing.', 'ai-seo-filler' ), count( $post_ids ) ),
 			'total'   => count( $post_ids ),
 			'estimate_minutes' => $this->estimate_minutes( count( $post_ids ) ),

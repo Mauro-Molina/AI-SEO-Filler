@@ -7,6 +7,7 @@
 
 namespace AiSeoFiller\Admin;
 
+use AiSeoFiller\AI_Content;
 use AiSeoFiller\AI_Provider;
 use AiSeoFiller\Bulk;
 use AiSeoFiller\Core;
@@ -50,6 +51,7 @@ class Admin {
 
 		add_submenu_page( 'ai-seo-filler', __( 'Settings', 'ai-seo-filler' ), __( 'Settings', 'ai-seo-filler' ), 'manage_options', 'ai-seo-filler', array( $this, 'render_settings_page' ) );
 		add_submenu_page( 'ai-seo-filler', __( 'Bulk Processing', 'ai-seo-filler' ), __( 'Bulk Processing', 'ai-seo-filler' ), 'manage_options', 'ai-seo-filler-bulk', array( $this, 'render_bulk_page' ) );
+		add_submenu_page( 'ai-seo-filler', __( 'History', 'ai-seo-filler' ), __( 'History', 'ai-seo-filler' ), 'manage_options', 'ai-seo-filler-history', array( $this, 'render_history_page' ) );
 	}
 
 	public function render_settings_page() {
@@ -66,8 +68,19 @@ class Admin {
 		include AI_SEO_FILLER_PLUGIN_DIR . 'admin/views/bulk-page.php';
 	}
 
+	public function render_history_page() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Insufficient permissions.', 'ai-seo-filler' ) );
+		}
+		include AI_SEO_FILLER_PLUGIN_DIR . 'admin/views/history-page.php';
+	}
+
 	public function enqueue_assets( $hook_suffix ) {
-		$plugin_screens = array( 'toplevel_page_ai-seo-filler', 'ai-seo-filler_page_ai-seo-filler-bulk' );
+		$plugin_screens = array(
+			'toplevel_page_ai-seo-filler',
+			'ai-seo-filler_page_ai-seo-filler-bulk',
+			'ai-seo-filler_page_ai-seo-filler-history',
+		);
 		$list_screens   = array( 'edit.php', 'edit-tags.php' );
 		$is_plugin      = in_array( $hook_suffix, $plugin_screens, true );
 		$is_editor      = in_array( $hook_suffix, array( 'post.php', 'post-new.php' ), true );
@@ -101,6 +114,12 @@ class Admin {
 	}
 
 	public function enqueue_block_editor_assets() {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+
+		if ( ! $screen || empty( $screen->post_type ) || ! Settings::is_post_type_enabled( $screen->post_type ) ) {
+			return;
+		}
+
 		wp_enqueue_style(
 			'ai-seo-filler-admin',
 			AI_SEO_FILLER_PLUGIN_URL . 'admin/css/admin.css',
@@ -130,12 +149,16 @@ class Admin {
 	 * @return array
 	 */
 	private function get_script_config() {
+		$post_id      = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$thin_content = $post_id ? AI_Content::is_thin_content( $post_id, 50 ) : false;
+
 		return array(
-			'ajaxUrl'   => admin_url( 'admin-ajax.php' ),
-			'nonce'     => wp_create_nonce( 'ai_seo_filler_nonce' ),
-			'seoPlugin' => Core::detect_seo_plugin(),
-			'preview'   => Settings::is_preview_mode(),
-			'i18n'      => array(
+			'ajaxUrl'      => admin_url( 'admin-ajax.php' ),
+			'nonce'        => wp_create_nonce( 'ai_seo_filler_nonce' ),
+			'seoPlugin'    => Core::detect_seo_plugin(),
+			'preview'      => Settings::is_preview_mode(),
+			'thinContent'  => $thin_content,
+			'i18n'         => array(
 				'generating'    => __( 'Generating SEO fields…', 'ai-seo-filler' ),
 				'success'       => __( 'SEO fields generated successfully.', 'ai-seo-filler' ),
 				'synced'        => __( 'SEO fields updated in the editor.', 'ai-seo-filler' ),
@@ -187,6 +210,18 @@ class Admin {
 				'imagesDiscard' => __( 'Discard', 'ai-seo-filler' ),
 				'imagesApplying' => __( 'Applying images…', 'ai-seo-filler' ),
 				'imagesSelectRequired' => __( 'Select a featured image first.', 'ai-seo-filler' ),
+				'undo'          => __( 'Undo last apply', 'ai-seo-filler' ),
+				'undoing'       => __( 'Restoring previous state…', 'ai-seo-filler' ),
+				'undoSuccess'   => __( 'Previous state restored.', 'ai-seo-filler' ),
+				'undoConfirm'   => __( 'Undo the last AI SEO Filler apply? This restores SEO fields, slug, content, and images from before that change.', 'ai-seo-filler' ),
+				'undoNothing'   => __( 'Nothing to undo.', 'ai-seo-filler' ),
+				'thinContentConfirm' => __( 'This item has little or no body content. “Meta only” will not fix Rank Math keyword-in-content tests. Continue anyway?', 'ai-seo-filler' ),
+				'thinContentWarning' => __( 'This item has little or no body content. Rank Math will fail keyword-in-content tests until you use “Generate all SEO”.', 'ai-seo-filler' ),
+				'generateAll'   => __( 'Generate all SEO', 'ai-seo-filler' ),
+				'metaOnly'      => __( 'Meta only', 'ai-seo-filler' ),
+				'lastRun'       => __( 'Last run:', 'ai-seo-filler' ),
+				'undoneLabel'   => __( 'Undone', 'ai-seo-filler' ),
+				'imagesLabel'   => __( 'Images', 'ai-seo-filler' ),
 				'emptyValue'    => __( '(empty)', 'ai-seo-filler' ),
 				'diffLabels'    => array(
 					'meta_title'       => __( 'SEO title', 'ai-seo-filler' ),
@@ -216,11 +251,42 @@ class Admin {
 		} elseif ( 'none' === $seo_plugin ) {
 			echo '<p class="description">' . esc_html__( 'No active Rank Math or Yoast SEO plugin detected.', 'ai-seo-filler' ) . '</p>';
 		} else {
-			printf( '<p class="description">%s</p>', esc_html( sprintf( __( 'Provider: %s', 'ai-seo-filler' ), AI_Provider::get_active_provider_label() ) ) );
+			printf(
+				'<p class="description">%s</p>',
+				esc_html(
+					sprintf(
+						/* translators: %s: active AI provider label */
+						__( 'Provider: %s', 'ai-seo-filler' ),
+						AI_Provider::get_active_provider_label()
+					)
+				)
+			);
+
+			$thin_content = AI_Content::is_thin_content( $post, 50 );
+			$is_product   = WooCommerce::is_product( $post );
+
+			if ( $thin_content ) {
+				$warning = $is_product
+					? __( 'This product has little or no long description. Rank Math will fail keyword-in-content tests until you generate full SEO content. Prefer “Generate all SEO”.', 'ai-seo-filler' )
+					: __( 'This item has little or no body content. Rank Math will fail keyword-in-content tests until you generate full SEO content. Prefer “Generate all SEO”.', 'ai-seo-filler' );
+
+				echo '<div class="ai-seo-filler-metabox-notice" role="status">';
+				echo '<p>' . esc_html( $warning ) . '</p>';
+				echo '</div>';
+			}
 
 			echo '<div class="ai-seo-filler-metabox-actions">';
-			printf( '<button type="button" class="button button-primary ai-seo-filler-generate" data-post-id="%d" data-mode="full">%s</button>', (int) $post->ID, esc_html__( 'Generate all SEO', 'ai-seo-filler' ) );
-			printf( '<button type="button" class="button ai-seo-filler-generate-meta" data-post-id="%d">%s</button>', (int) $post->ID, esc_html__( 'Meta only', 'ai-seo-filler' ) );
+			printf(
+				'<button type="button" class="button button-primary ai-seo-filler-generate" data-post-id="%d" data-mode="full">%s</button>',
+				(int) $post->ID,
+				esc_html__( 'Generate all SEO', 'ai-seo-filler' )
+			);
+			printf(
+				'<button type="button" class="button ai-seo-filler-generate-meta" data-post-id="%d" data-thin-content="%d">%s</button>',
+				(int) $post->ID,
+				$thin_content ? 1 : 0,
+				esc_html__( 'Meta only', 'ai-seo-filler' )
+			);
 			echo '</div>';
 
 			echo '<div class="ai-seo-filler-metabox-images">';
@@ -246,12 +312,39 @@ class Admin {
 			echo '<div class="ai-seo-filler-status" aria-live="polite"></div>';
 			echo '<div class="ai-seo-filler-checklist"></div>';
 
-			$history = History::get_for_post( $post->ID );
-			if ( ! empty( $history ) ) {
-				echo '<p class="description" style="margin-top:10px;"><strong>' . esc_html__( 'Last run:', 'ai-seo-filler' ) . '</strong> ';
-				echo esc_html( gmdate( 'Y-m-d H:i', $history[0]['timestamp'] ) );
-				echo ' — ' . esc_html( $history[0]['provider'] ?? '' ) . '</p>';
+			$history   = History::get_for_post( $post->ID );
+			$can_undo  = History::can_undo( $post->ID );
+			$last_entry = ! empty( $history[0] ) && is_array( $history[0] ) ? $history[0] : null;
+
+			echo '<div class="ai-seo-filler-history">';
+
+			if ( $last_entry ) {
+				$action_label = ( isset( $last_entry['action'] ) && 'apply_images' === $last_entry['action'] )
+					? __( 'Images', 'ai-seo-filler' )
+					: __( 'SEO', 'ai-seo-filler' );
+
+				if ( ! empty( $last_entry['undone'] ) ) {
+					$action_label = __( 'Undone', 'ai-seo-filler' );
+				}
+
+				echo '<p class="description ai-seo-filler-history__meta"><strong>' . esc_html__( 'Last run:', 'ai-seo-filler' ) . '</strong> ';
+				echo esc_html( gmdate( 'Y-m-d H:i', (int) ( $last_entry['timestamp'] ?? time() ) ) );
+				echo ' — ' . esc_html( $last_entry['provider'] ?? '' );
+				echo ' <span class="ai-seo-filler-history__type">(' . esc_html( $action_label ) . ')</span></p>';
 			}
+
+			printf(
+				'<button type="button" class="button ai-seo-filler-undo"%s data-post-id="%d">%s</button>',
+				$can_undo ? '' : ' disabled',
+				(int) $post->ID,
+				esc_html__( 'Undo last apply', 'ai-seo-filler' )
+			);
+
+			if ( ! $can_undo && $last_entry && empty( $last_entry['before'] ) ) {
+				echo '<p class="description ai-seo-filler-history__hint">' . esc_html__( 'Undo is available after the next SEO or image apply.', 'ai-seo-filler' ) . '</p>';
+			}
+
+			echo '</div>';
 		}
 
 		echo '</div>';

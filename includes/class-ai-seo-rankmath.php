@@ -105,6 +105,15 @@ class RankMath {
 	}
 
 	/**
+	 * Returns the Rank Math meta key → internal field map.
+	 *
+	 * @return array<string, string>
+	 */
+	public static function get_meta_map() {
+		return self::$meta_map;
+	}
+
+	/**
 	 * Builds a meta object for the block editor from SEO data.
 	 *
 	 * @param array $seo_data Structured SEO data.

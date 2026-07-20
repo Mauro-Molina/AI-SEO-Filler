@@ -2,300 +2,1500 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: AI SEO Filler 0.1.0\n"
-"Report-Msgid-Bugs-To: https://yourwebsite.com/ai-seo-filler\n"
-"POT-Creation-Date: 2026-06-29 00:00+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Project-Id-Version: AI SEO Filler 0.2.9\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/ai-seo-filler\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-07-20T19:45:24+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.11.0\n"
+"X-Domain: ai-seo-filler\n"
 
-#: includes/class-ai-seo-bulk.php
-msgid "Every minute (AI SEO Filler)"
-msgstr ""
-
-#: includes/class-ai-seo-bulk.php
-msgid "Insufficient permissions."
-msgstr ""
-
-#: includes/class-ai-seo-bulk.php
-msgid "Gemini API key is not configured."
-msgstr ""
-
-#: includes/class-ai-seo-bulk.php
-msgid "No compatible SEO plugin detected."
-msgstr ""
-
-#: includes/class-ai-seo-bulk.php
-msgid "Invalid content type."
-msgstr ""
-
-#: includes/class-ai-seo-bulk.php
-msgid "Invalid post status."
-msgstr ""
-
-#: includes/class-ai-seo-bulk.php
-msgid "No posts found to process."
-msgstr ""
-
-#: includes/class-ai-seo-bulk.php
-msgid "%d posts queued for processing."
-msgstr ""
-
-#: includes/class-ai-seo-bulk.php
-msgid "Bulk processing cancelled."
-msgstr ""
-
-#: includes/class-ai-seo-core.php
-msgid "Invalid post."
-msgstr ""
-
-#: includes/class-ai-seo-core.php
-msgid "You cannot edit this post."
-msgstr ""
-
-#: includes/class-ai-seo-core.php
-msgid "SEO fields generated and saved successfully."
-msgstr ""
-
-#: includes/class-ai-seo-gemini.php
-msgid "Invalid post ID."
-msgstr ""
-
-#: includes/class-ai-seo-gemini.php
-msgid "Post not found."
-msgstr ""
-
-#: includes/class-ai-seo-gemini.php
-msgid "Gemini connection error: %s"
-msgstr ""
-
-#: includes/class-ai-seo-gemini.php
-msgid "Unknown Gemini API error."
-msgstr ""
-
-#: includes/class-ai-seo-gemini.php
-msgid "Gemini returned error %1$d: %2$s"
-msgstr ""
-
-#: includes/class-ai-seo-gemini.php
-msgid "Gemini response is not valid JSON."
-msgstr ""
-
-#: includes/class-ai-seo-gemini.php
-msgid "Gemini returned no content."
-msgstr ""
-
-#: includes/class-ai-seo-gemini.php
-msgid "Could not parse Gemini JSON response."
-msgstr ""
-
-#: admin/class-ai-seo-admin.php
+#. Plugin Name of the plugin
+#: ai-seo-filler.php
+#: admin/class-ai-seo-admin.php:42
+#: admin/class-ai-seo-admin.php:43
+#: admin/class-ai-seo-admin.php:190
+#: admin/class-ai-seo-admin.php:230
 msgid "AI SEO Filler"
 msgstr ""
 
-#: admin/class-ai-seo-admin.php
+#. Plugin URI of the plugin
+#: ai-seo-filler.php
+msgid "https://yourwebsite.com/ai-seo-filler"
+msgstr ""
+
+#. Description of the plugin
+#: ai-seo-filler.php
+msgid "Automatically generates SEO fields for WooCommerce products, posts and pages using Gemini Flash, and writes them to Rank Math and Yoast SEO."
+msgstr ""
+
+#. Author of the plugin
+#: ai-seo-filler.php
+msgid "Mauro Molina Mazón"
+msgstr ""
+
+#. Author URI of the plugin
+#: ai-seo-filler.php
+msgid "https://yourwebsite.com"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:51
 msgid "Settings"
 msgstr ""
 
-#: admin/class-ai-seo-admin.php
+#: admin/class-ai-seo-admin.php:52
 msgid "Bulk Processing"
 msgstr ""
 
-#: admin/class-ai-seo-admin.php
+#: admin/class-ai-seo-admin.php:53
+msgid "History"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:58
+#: admin/class-ai-seo-admin.php:65
+#: admin/class-ai-seo-admin.php:72
+#: admin/class-ai-seo-admin.php:356
+#: includes/class-ai-seo-bulk.php:59
+#: includes/class-ai-seo-bulk.php:149
+#: includes/class-ai-seo-bulk.php:161
+#: includes/class-ai-seo-bulk.php:174
+#: includes/class-ai-seo-bulk.php:182
+#: includes/class-ai-seo-core.php:367
+#: includes/class-ai-seo-core.php:390
+#: includes/class-ai-seo-core.php:416
+#: includes/class-ai-seo-core.php:450
+#: includes/class-ai-seo-core.php:607
+msgid "Insufficient permissions."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:157
 msgid "Generating SEO fields…"
 msgstr ""
 
-#: admin/class-ai-seo-admin.php
+#: admin/class-ai-seo-admin.php:158
 msgid "SEO fields generated successfully."
 msgstr ""
 
-#: admin/class-ai-seo-admin.php
+#: admin/class-ai-seo-admin.php:159
+msgid "SEO fields updated in the editor."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:160
 msgid "Failed to generate SEO fields."
 msgstr ""
 
-#: admin/class-ai-seo-admin.php
+#: admin/class-ai-seo-admin.php:161
 msgid "Processing…"
 msgstr ""
 
-#: admin/class-ai-seo-admin.php
+#: admin/class-ai-seo-admin.php:162
 msgid "Bulk processing completed."
 msgstr ""
 
-#: admin/class-ai-seo-admin.php
-msgid "Configure your Gemini API key under AI SEO Filler → Settings."
+#: admin/class-ai-seo-admin.php:163
+#: includes/class-ai-seo-bulk.php:185
+msgid "Bulk processing cancelled."
 msgstr ""
 
-#: admin/class-ai-seo-admin.php
+#: admin/class-ai-seo-admin.php:164
+msgid "Start bulk SEO generation for the selected content?"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:165
+msgid "Cancel the current bulk queue?"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:166
+msgid "SEO Preview"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:167
+msgid "Preview ready. Review and apply."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:168
+msgid "Apply changes"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:169
+msgid "Cancel"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:170
+msgid "Applying changes…"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:171
+msgid "Loading…"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:172
+msgid "Pausing…"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:173
+msgid "Resuming…"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:174
+msgid "Cancelling…"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:175
+msgid "Rank Math score"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:176
+msgid "Calculating…"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:177
+msgid "Same analyzer as the Rank Math panel."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:178
+#: admin/class-ai-seo-admin.php:221
+#: admin/views/history-page.php:48
+msgid "Focus keyword"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:179
+msgid "Testing API…"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:180
+msgid "Saving key…"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:181
+#: includes/class-ai-seo-core.php:403
+msgid "OpenAI API key saved."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:182
+msgid "OpenAI configured"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:183
+#: admin/views/settings-page.php:77
+msgid "Show"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:184
+msgid "Hide"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:185
+#: admin/views/settings-page.php:78
+msgid "Copy"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:186
+msgid "Copied!"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:187
+msgid "Could not copy the key."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:188
+msgid "Success"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:189
+msgid "Error"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:191
+msgid "Close"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:192
+#: includes/class-ai-seo-bulk.php:155
+msgid "Bulk processing paused."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:193
+#: includes/class-ai-seo-bulk.php:168
+msgid "Bulk processing resumed."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:194
+msgid "Choose which keyword to save when you apply."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:195
+msgid "Changes"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:196
+msgid "Generating images with AI… This may take a minute."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:197
+msgid "Images generated and assigned successfully."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:198
+msgid "Generate AI images for this item? You will choose the featured image before they are applied."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:199
+msgid "Choose featured image"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:200
+msgid "Click an image to set it as featured. The others will be added to the product gallery."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:201
+msgid "Click an image to set it as the featured image."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:202
+msgid "Featured"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:203
+msgid "Gallery"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:204
+msgid "Apply selection"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:205
+msgid "Discard"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:206
+msgid "Applying images…"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:207
+msgid "Select a featured image first."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:208
+#: admin/class-ai-seo-admin.php:309
+msgid "Undo last apply"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:209
+msgid "Restoring previous state…"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:210
+msgid "Previous state restored."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:211
+msgid "Undo the last AI SEO Filler apply? This restores SEO fields, slug, content, and images from before that change."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:212
+msgid "Nothing to undo."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:213
+#: admin/class-ai-seo-admin.php:299
+msgid "Last run:"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:214
+#: admin/class-ai-seo-admin.php:296
+#: admin/views/history-page.php:92
+#: includes/class-ai-seo-history.php:585
+msgid "Undone"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:215
+#: admin/class-ai-seo-admin.php:292
+#: admin/views/history-page.php:91
+#: admin/views/settings-page.php:42
+#: includes/class-ai-seo-history.php:590
+msgid "Images"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:216
+msgid "(empty)"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:218
+#: admin/views/history-page.php:46
+msgid "SEO title"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:219
+#: admin/views/history-page.php:47
+msgid "Meta description"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:220
+msgid "URL slug"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:222
+msgid "Word count"
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:241
+msgid "Configure your AI provider API key under AI SEO Filler → Settings."
+msgstr ""
+
+#: admin/class-ai-seo-admin.php:243
 msgid "No active Rank Math or Yoast SEO plugin detected."
 msgstr ""
 
-#: admin/class-ai-seo-admin.php
-msgid "Detected SEO plugin: %s"
+#. translators: %s: active AI provider label
+#: admin/class-ai-seo-admin.php:250
+msgid "Provider: %s"
 msgstr ""
 
-#: admin/class-ai-seo-admin.php
-msgid "Generate SEO with AI"
+#: admin/class-ai-seo-admin.php:257
+msgid "Generate all SEO"
 msgstr ""
 
-#: admin/views/settings-page.php
-msgid "Status"
+#: admin/class-ai-seo-admin.php:258
+msgid "Meta only"
 msgstr ""
 
-#: admin/views/settings-page.php
-msgid "API Key:"
+#: admin/class-ai-seo-admin.php:262
+msgid "Generate product images separately using the title and description. You will choose the featured image before applying."
 msgstr ""
 
-#: admin/views/settings-page.php
-msgid "Configured"
+#: admin/class-ai-seo-admin.php:266
+msgid "Generate images (featured + 3 gallery)"
 msgstr ""
 
-#: admin/views/settings-page.php
-msgid "Not configured"
+#: admin/class-ai-seo-admin.php:267
+msgid "Generate featured image"
 msgstr ""
 
-#: admin/views/settings-page.php
-msgid "SEO Plugin:"
+#: admin/class-ai-seo-admin.php:276
+msgid "Configure Flux (free) or an OpenAI/Gemini API key to generate images."
 msgstr ""
 
-#: admin/views/settings-page.php
-msgid "None detected"
+#: admin/class-ai-seo-admin.php:293
+#: admin/views/history-page.php:90
+#: admin/views/settings-page.php:132
+#: includes/class-ai-seo-history.php:596
+msgid "SEO"
 msgstr ""
 
-#: admin/views/settings-page.php
-msgid "Model:"
+#: admin/class-ai-seo-admin.php:313
+msgid "Undo is available after the next SEO or image apply."
 msgstr ""
 
-#: admin/views/settings-page.php
-msgid "Gemini API Key"
+#: admin/class-ai-seo-admin.php:341
+msgid "Generate SEO"
 msgstr ""
 
-#: admin/views/settings-page.php
-msgid "Enter your Google AI API key"
+#: admin/class-ai-seo-admin.php:352
+msgid "Invalid request."
 msgstr ""
 
-#: admin/views/settings-page.php
-msgid "Get a free API key at Google AI Studio. Leave blank to keep the current key."
-msgstr ""
-
-#: admin/views/settings-page.php
-msgid "Content Language"
-msgstr ""
-
-#: admin/views/settings-page.php
-msgid "Locale code used to instruct Gemini (e.g. en_US, es_ES). Defaults to your WordPress locale."
-msgstr ""
-
-#: admin/views/settings-page.php
-msgid "Auto-detect"
-msgstr ""
-
-#: admin/views/settings-page.php
-msgid "Rank Math"
-msgstr ""
-
-#: admin/views/settings-page.php
-msgid "Yoast SEO"
-msgstr ""
-
-#: admin/views/settings-page.php
-msgid "Choose which SEO plugin receives the generated fields. Auto-detect is recommended."
-msgstr ""
-
-#: admin/views/settings-page.php
-msgid "Save Settings"
-msgstr ""
-
-#: admin/views/bulk-page.php
-msgid "Configure your Gemini API key before running bulk processing."
-msgstr ""
-
-#: admin/views/bulk-page.php
-msgid "No compatible SEO plugin detected. Install Rank Math or Yoast SEO first."
-msgstr ""
-
-#: admin/views/bulk-page.php
-msgid "Start Bulk Processing"
-msgstr ""
-
-#: admin/views/bulk-page.php
-msgid "Posts are processed in batches of %d via WP-Cron (approximately one batch per minute)."
-msgstr ""
-
-#: admin/views/bulk-page.php
-msgid "Content Type"
-msgstr ""
-
-#: admin/views/bulk-page.php
-msgid "Posts"
-msgstr ""
-
-#: admin/views/bulk-page.php
-msgid "Pages"
-msgstr ""
-
-#: admin/views/bulk-page.php
-msgid "Products"
-msgstr ""
-
-#: admin/views/bulk-page.php
-msgid "Post Status"
-msgstr ""
-
-#: admin/views/bulk-page.php
+#: admin/views/bulk-page.php:22
 msgid "Published"
 msgstr ""
 
-#: admin/views/bulk-page.php
+#: admin/views/bulk-page.php:23
 msgid "Draft"
 msgstr ""
 
-#: admin/views/bulk-page.php
+#: admin/views/bulk-page.php:24
 msgid "Pending"
 msgstr ""
 
-#: admin/views/bulk-page.php
+#: admin/views/bulk-page.php:25
 msgid "Private"
 msgstr ""
 
-#: admin/views/bulk-page.php
+#: admin/views/bulk-page.php:26
 msgid "Scheduled"
 msgstr ""
 
-#: admin/views/bulk-page.php
+#: admin/views/bulk-page.php:40
+msgid "Configure your AI provider API key before running bulk processing."
+msgstr ""
+
+#: admin/views/bulk-page.php:42
+#: includes/class-ai-seo-bulk.php:67
+#: includes/class-ai-seo-core.php:498
+#: includes/class-ai-seo-history.php:265
+msgid "No compatible SEO plugin detected."
+msgstr ""
+
+#: admin/views/bulk-page.php:46
+msgid "Start Bulk Processing"
+msgstr ""
+
+#. translators: %d: bulk batch size
+#: admin/views/bulk-page.php:51
+msgid "Uses Action Scheduler when available, otherwise WP-Cron. Batch size: %d."
+msgstr ""
+
+#: admin/views/bulk-page.php:59
+msgid "Content Type"
+msgstr ""
+
+#: admin/views/bulk-page.php:69
+msgid "Post Status"
+msgstr ""
+
+#: admin/views/bulk-page.php:79
+msgid "Published in last N days"
+msgstr ""
+
+#: admin/views/bulk-page.php:80
+msgid "0 = all time"
+msgstr ""
+
+#: admin/views/bulk-page.php:83
+msgid "Category filter"
+msgstr ""
+
+#: admin/views/bulk-page.php:86
+msgid "All categories"
+msgstr ""
+
+#: admin/views/bulk-page.php:99
+msgid "Filters"
+msgstr ""
+
+#: admin/views/bulk-page.php:101
+msgid "Only posts without existing SEO"
+msgstr ""
+
+#: admin/views/bulk-page.php:107
 msgid "Start Bulk Generation"
 msgstr ""
 
-#: admin/views/bulk-page.php
+#: admin/views/bulk-page.php:108
+msgid "Pause"
+msgstr ""
+
+#: admin/views/bulk-page.php:109
+msgid "Resume"
+msgstr ""
+
+#: admin/views/bulk-page.php:110
 msgid "Cancel Queue"
 msgstr ""
 
-#: admin/views/bulk-page.php
+#: admin/views/bulk-page.php:111
+msgid "Export Error Log (CSV)"
+msgstr ""
+
+#: admin/views/bulk-page.php:116
 msgid "Progress"
 msgstr ""
 
-#: admin/views/bulk-page.php
+#: admin/views/bulk-page.php:121
+msgid "Status:"
+msgstr ""
+
+#: admin/views/bulk-page.php:122
 msgid "Total:"
 msgstr ""
 
-#: admin/views/bulk-page.php
+#: admin/views/bulk-page.php:123
 msgid "Processed:"
 msgstr ""
 
-#: admin/views/bulk-page.php
+#: admin/views/bulk-page.php:124
 msgid "Pending:"
 msgstr ""
 
-#: admin/views/bulk-page.php
+#: admin/views/bulk-page.php:125
 msgid "Errors:"
 msgstr ""
 
-#: admin/views/bulk-page.php
+#: admin/views/bulk-page.php:130
 msgid "Recent Errors"
 msgstr ""
 
-#: admin/views/bulk-page.php
+#. translators: 1: post ID, 2: error message
+#: admin/views/bulk-page.php:136
 msgid "Post #%1$d: %2$s"
+msgstr ""
+
+#: admin/views/history-page.php:49
+msgid "Keyword alternatives"
+msgstr ""
+
+#: admin/views/history-page.php:50
+msgid "Slug"
+msgstr ""
+
+#: admin/views/history-page.php:51
+msgid "OG title"
+msgstr ""
+
+#: admin/views/history-page.php:52
+msgid "OG description"
+msgstr ""
+
+#: admin/views/history-page.php:53
+msgid "Short description"
+msgstr ""
+
+#: admin/views/history-page.php:54
+#: admin/views/history-page.php:121
+msgid "Content"
+msgstr ""
+
+#: admin/views/history-page.php:55
+msgid "Image alts"
+msgstr ""
+
+#: admin/views/history-page.php:61
+msgid "Recent SEO and image applies across your content. You can undo the latest apply for each item when a snapshot is available."
+msgstr ""
+
+#: admin/views/history-page.php:68
+msgid "Search"
+msgstr ""
+
+#: admin/views/history-page.php:74
+msgid "Search by title…"
+msgstr ""
+
+#: admin/views/history-page.php:77
+msgid "Content type"
+msgstr ""
+
+#: admin/views/history-page.php:79
+msgid "All types"
+msgstr ""
+
+#: admin/views/history-page.php:87
+#: admin/views/history-page.php:122
+msgid "Action"
+msgstr ""
+
+#: admin/views/history-page.php:89
+msgid "All actions"
+msgstr ""
+
+#: admin/views/history-page.php:95
+msgid "Filter"
+msgstr ""
+
+#: admin/views/history-page.php:98
+msgid "Reset"
+msgstr ""
+
+#. translators: %d: number of history entries
+#: admin/views/history-page.php:106
+msgid "%d entry"
+msgid_plural "%d entries"
+msgstr[0] ""
+msgstr[1] ""
+
+#: admin/views/history-page.php:114
+msgid "No history yet. Generate SEO or images on a post, page, or product to see entries here."
+msgstr ""
+
+#: admin/views/history-page.php:120
+msgid "When"
+msgstr ""
+
+#: admin/views/history-page.php:123
+#: admin/views/settings-page.php:124
+msgid "Provider"
+msgstr ""
+
+#: admin/views/history-page.php:124
+msgid "User"
+msgstr ""
+
+#: admin/views/history-page.php:125
+msgid "Details"
+msgstr ""
+
+#: admin/views/history-page.php:126
+msgid "Actions"
+msgstr ""
+
+#. translators: %d: attachment ID
+#: admin/views/history-page.php:142
+msgid "Featured #%d"
+msgstr ""
+
+#. translators: %d: gallery image count
+#: admin/views/history-page.php:146
+msgid "%d gallery"
+msgstr ""
+
+#: admin/views/history-page.php:170
+#: admin/views/history-page.php:173
+msgid "(no title)"
+msgstr ""
+
+#: admin/views/history-page.php:207
+msgid "Edit"
+msgstr ""
+
+#: admin/views/history-page.php:215
+msgid "Undo"
+msgstr ""
+
+#. translators: %d: number of history entries
+#: admin/views/history-page.php:231
+msgid "%d item"
+msgid_plural "%d items"
+msgstr[0] ""
+msgstr[1] ""
+
+#: admin/views/settings-page.php:16
+msgid "Auto-detect"
+msgstr ""
+
+#: admin/views/settings-page.php:17
+msgid "Rank Math"
+msgstr ""
+
+#: admin/views/settings-page.php:18
+msgid "Yoast SEO"
+msgstr ""
+
+#: admin/views/settings-page.php:22
+msgid "None detected"
+msgstr ""
+
+#: admin/views/settings-page.php:41
+#: admin/views/settings-page.php:185
+msgid "AI Providers"
+msgstr ""
+
+#: admin/views/settings-page.php:43
+msgid "Generation"
+msgstr ""
+
+#: admin/views/settings-page.php:44
+#: admin/views/settings-page.php:477
+msgid "Content Types"
+msgstr ""
+
+#: admin/views/settings-page.php:45
+#: admin/views/settings-page.php:510
+msgid "General"
+msgstr ""
+
+#: admin/views/settings-page.php:77
+msgid "Show key"
+msgstr ""
+
+#: admin/views/settings-page.php:78
+msgid "Copy key"
+msgstr ""
+
+#. translators: 1: provider label, 2: key preview
+#: admin/views/settings-page.php:87
+msgid "%1$s configured (%2$s)"
+msgstr ""
+
+#. translators: %s: provider label
+#: admin/views/settings-page.php:100
+msgid "%s not configured"
+msgstr ""
+
+#: admin/views/settings-page.php:122
+msgid "Current status"
+msgstr ""
+
+#: admin/views/settings-page.php:128
+msgid "Model"
+msgstr ""
+
+#: admin/views/settings-page.php:136
+msgid "APIs"
+msgstr ""
+
+#: admin/views/settings-page.php:153
+msgid "OpenAI is selected but has no API key. Add one in Images, or switch to Gemini/Groq for free-tier text generation."
+msgstr ""
+
+#: admin/views/settings-page.php:163
+msgid "Settings sections"
+msgstr ""
+
+#: admin/views/settings-page.php:187
+msgid "Configure the service that generates SEO text. Only the selected provider panel is shown below."
+msgstr ""
+
+#: admin/views/settings-page.php:193
+msgid "AI Provider"
+msgstr ""
+
+#: admin/views/settings-page.php:204
+msgid "Switch to Groq if Gemini is unavailable or overloaded."
+msgstr ""
+
+#: admin/views/settings-page.php:211
+#: includes/class-ai-seo-settings.php:407
+msgid "Google Gemini"
+msgstr ""
+
+#: admin/views/settings-page.php:215
+msgid "Gemini API Key"
+msgstr ""
+
+#: admin/views/settings-page.php:224
+msgid "Gemini"
+msgstr ""
+
+#: admin/views/settings-page.php:226
+#: admin/views/settings-page.php:269
+#: admin/views/settings-page.php:356
+msgid "Paste a new key to replace the current one"
+msgstr ""
+
+#: admin/views/settings-page.php:227
+msgid "Enter your Google AI API key"
+msgstr ""
+
+#: admin/views/settings-page.php:228
+msgid "Get a free API key at aistudio.google.com/apikey."
+msgstr ""
+
+#: admin/views/settings-page.php:238
+msgid "Gemini Model"
+msgstr ""
+
+#: admin/views/settings-page.php:254
+#: admin/views/settings-page.php:267
+#: includes/class-ai-seo-settings.php:408
+msgid "Groq"
+msgstr ""
+
+#: admin/views/settings-page.php:258
+msgid "Groq API Key"
+msgstr ""
+
+#: admin/views/settings-page.php:270
+msgid "Enter your Groq API key (gsk_...)"
+msgstr ""
+
+#: admin/views/settings-page.php:271
+msgid "Get a free API key at console.groq.com."
+msgstr ""
+
+#: admin/views/settings-page.php:281
+msgid "Groq Model"
+msgstr ""
+
+#: admin/views/settings-page.php:292
+msgid "Groq offers a generous free tier with fast inference."
+msgstr ""
+
+#: admin/views/settings-page.php:300
+#: admin/views/settings-page.php:354
+#: includes/class-ai-seo-settings.php:409
+msgid "OpenAI"
+msgstr ""
+
+#: admin/views/settings-page.php:301
+msgid "The OpenAI API key is configured in the Images tab (shared for text and DALL·E)."
+msgstr ""
+
+#: admin/views/settings-page.php:304
+msgid "OpenAI Model"
+msgstr ""
+
+#: admin/views/settings-page.php:317
+msgid "Test API Connection"
+msgstr ""
+
+#: admin/views/settings-page.php:330
+msgid "AI Image Generation"
+msgstr ""
+
+#: admin/views/settings-page.php:332
+msgid "Separate from SEO text generation. Creates a featured image and gallery images for products, or a featured image for other content."
+msgstr ""
+
+#: admin/views/settings-page.php:337
+msgid "OpenAI API Key"
+msgstr ""
+
+#: admin/views/settings-page.php:343
+msgid "Save OpenAI Key"
+msgstr ""
+
+#: admin/views/settings-page.php:344
+msgid "Test OpenAI Key"
+msgstr ""
+
+#: admin/views/settings-page.php:358
+msgid "Required for DALL·E and when OpenAI is the text provider."
+msgstr ""
+
+#: admin/views/settings-page.php:368
+msgid "Image provider"
+msgstr ""
+
+#: admin/views/settings-page.php:375
+msgid "Flux (Pollinations) is free and needs no API key. Gemini/OpenAI are optional fallbacks."
+msgstr ""
+
+#: admin/views/settings-page.php:379
+msgid "Flux model"
+msgstr ""
+
+#: admin/views/settings-page.php:386
+msgid "Uses Pollinations.ai. Free tier may be rate-limited; generating 4 product images can take a minute."
+msgstr ""
+
+#: admin/views/settings-page.php:390
+msgid "OpenAI image model"
+msgstr ""
+
+#: admin/views/settings-page.php:393
+msgid "Use dall-e-3 for DALL·E. GPT Image models are handled automatically."
+msgstr ""
+
+#: admin/views/settings-page.php:397
+msgid "Gemini image model"
+msgstr ""
+
+#: admin/views/settings-page.php:404
+msgid "Uses the Gemini generateContent API (not legacy Imagen predict)."
+msgstr ""
+
+#: admin/views/settings-page.php:418
+msgid "Generation Behavior"
+msgstr ""
+
+#: admin/views/settings-page.php:420
+msgid "Control what gets generated and how overwrites behave."
+msgstr ""
+
+#: admin/views/settings-page.php:426
+msgid "Preview before applying"
+msgstr ""
+
+#: admin/views/settings-page.php:427
+msgid "Only fill empty SEO fields"
+msgstr ""
+
+#: admin/views/settings-page.php:428
+msgid "Create revision backup before overwrite"
+msgstr ""
+
+#: admin/views/settings-page.php:429
+msgid "Fallback to other providers on failure"
+msgstr ""
+
+#: admin/views/settings-page.php:430
+msgid "Generate meta title/description/keyword"
+msgstr ""
+
+#: admin/views/settings-page.php:431
+msgid "Generate URL slug"
+msgstr ""
+
+#: admin/views/settings-page.php:432
+msgid "Rewrite post content (600+ words)"
+msgstr ""
+
+#: admin/views/settings-page.php:433
+msgid "Generate short description (WooCommerce)"
+msgstr ""
+
+#: admin/views/settings-page.php:434
+msgid "Generate image alt texts"
+msgstr ""
+
+#: admin/views/settings-page.php:449
+msgid "Minimum word count"
+msgstr ""
+
+#: admin/views/settings-page.php:453
+msgid "Content tone"
+msgstr ""
+
+#: admin/views/settings-page.php:456
+msgid "Commercial"
+msgstr ""
+
+#: admin/views/settings-page.php:456
+msgid "Technical"
+msgstr ""
+
+#: admin/views/settings-page.php:456
+msgid "Neutral"
+msgstr ""
+
+#: admin/views/settings-page.php:463
+msgid "Bulk rate limit (seconds/item)"
+msgstr ""
+
+#: admin/views/settings-page.php:479
+msgid "Choose which post types can use AI SEO Filler (metabox, bulk processing, history, and Gutenberg sidebar)."
+msgstr ""
+
+#: admin/views/settings-page.php:498
+msgid "No selectable post types were found."
+msgstr ""
+
+#: admin/views/settings-page.php:512
+msgid "Language and SEO plugin integration."
+msgstr ""
+
+#: admin/views/settings-page.php:518
+msgid "Content Language"
+msgstr ""
+
+#: admin/views/settings-page.php:532
+msgid "Language used by the AI for generated SEO content, descriptions, and image metadata."
+msgstr ""
+
+#: admin/views/settings-page.php:538
+msgid "SEO Plugin"
+msgstr ""
+
+#: admin/views/settings-page.php:549
+msgid "Choose which SEO plugin receives the generated fields. Auto-detect is recommended."
+msgstr ""
+
+#: admin/views/settings-page.php:557
+msgid "Save Settings"
+msgstr ""
+
+#: admin/views/settings-page.php:558
+msgid "Saves all tabs at once."
+msgstr ""
+
+#. translators: 1: actual word count, 2: required minimum
+#: includes/class-ai-seo-ai-content.php:399
+msgid "Generated content has only %1$d words (minimum %2$d). Try again or use Meta only mode."
+msgstr ""
+
+#: includes/class-ai-seo-ai-content.php:602
+msgid "Could not parse AI JSON response: no JSON object found in the response."
+msgstr ""
+
+#. translators: %s: JSON parser error message
+#: includes/class-ai-seo-ai-content.php:615
+msgid "Could not parse AI JSON response: %s"
+msgstr ""
+
+#: includes/class-ai-seo-ai-content.php:616
+msgid "invalid JSON syntax"
+msgstr ""
+
+#: includes/class-ai-seo-ai-content.php:899
+msgid "Invalid post ID."
+msgstr ""
+
+#: includes/class-ai-seo-ai-content.php:908
+msgid "Post not found."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:30
+msgid "No image generation provider configured. Choose Flux (free) or add an OpenAI/Gemini API key in Settings."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:41
+msgid "You cannot upload images for this post."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:152
+msgid "Image selection expired. Generate images again."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:156
+msgid "You cannot apply these images."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:160
+#: includes/class-ai-seo-core.php:617
+#: includes/class-ai-seo-history.php:200
+msgid "You cannot edit this post."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:166
+msgid "Select a valid featured image."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:328
+msgid "You cannot discard these images."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:576
+msgid "AI plan did not include a featured image."
+msgstr ""
+
+#. translators: %d: required gallery image count
+#: includes/class-ai-seo-ai-images.php:584
+msgid "AI plan must include %d gallery images."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:620
+msgid "No text AI provider available for image planning."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:631
+#: includes/class-ai-seo-ai-images.php:662
+#: includes/class-ai-seo-ai-images.php:954
+#: includes/class-ai-seo-openai.php:61
+#: includes/class-ai-seo-openai.php:104
+msgid "OpenAI API key is not configured."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:639
+#: includes/class-ai-seo-groq.php:63
+#: includes/class-ai-seo-groq.php:107
+msgid "Groq API key is not configured."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:647
+#: includes/class-ai-seo-ai-images.php:1026
+#: includes/class-ai-seo-gemini.php:71
+#: includes/class-ai-seo-gemini.php:116
+msgid "Gemini API key is not configured."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:702
+msgid "OpenAI API error while planning images."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:707
+#: includes/class-ai-seo-openai.php:221
+#: includes/class-ai-seo-openai.php:304
+msgid "OpenAI returned no content."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:775
+msgid "Could not download the generated OpenAI image."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:785
+msgid "OpenAI returned no image data."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:798
+msgid "No image generation provider configured."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:831
+msgid "Image generation failed."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:861
+msgid "Image prompt is empty."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:919
+msgid "Flux / Pollinations rate limit reached. Wait a moment and try again."
+msgstr ""
+
+#. translators: %d: HTTP status code
+#: includes/class-ai-seo-ai-images.php:928
+msgid "Flux / Pollinations image error (HTTP %d)."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:937
+msgid "Flux / Pollinations did not return an image."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:943
+msgid "Flux / Pollinations image generation failed."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:980
+#: includes/class-ai-seo-ai-images.php:1007
+msgid "OpenAI image API error."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:1051
+#: includes/class-ai-seo-ai-images.php:1097
+msgid "Gemini image API error."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:1105
+msgid "Gemini returned no image data."
+msgstr ""
+
+#: includes/class-ai-seo-ai-images.php:1187
+msgid "Could not create media attachment."
+msgstr ""
+
+#: includes/class-ai-seo-ai-provider.php:152
+msgid "No AI provider available."
+msgstr ""
+
+#. translators: 1: working provider label, 2: configured primary provider label
+#: includes/class-ai-seo-ai-provider.php:194
+msgid "Connection OK with %1$s. Your primary provider (%2$s) is unavailable — switch to %1$s in Settings for free-tier usage."
+msgstr ""
+
+#: includes/class-ai-seo-ai-provider.php:212
+msgid "No AI provider configured. Add a free Gemini or Groq API key in Settings."
+msgstr ""
+
+#. translators: 1: actual word count, 2: required minimum
+#: includes/class-ai-seo-ai-provider.php:254
+msgid "Generated content has only %1$d words (minimum %2$d)."
+msgstr ""
+
+#: includes/class-ai-seo-bulk.php:44
+msgid "Every minute (AI SEO Filler)"
+msgstr ""
+
+#: includes/class-ai-seo-bulk.php:77
+msgid "Invalid content type."
+msgstr ""
+
+#: includes/class-ai-seo-bulk.php:116
+msgid "No posts found to process."
+msgstr ""
+
+#. translators: %d: number of posts queued
+#: includes/class-ai-seo-bulk.php:134
+msgid "%d posts queued for processing."
+msgstr ""
+
+#: includes/class-ai-seo-core.php:156
+msgid "This post already has SEO fields. Disable \"Only if empty\" in settings to overwrite."
+msgstr ""
+
+#: includes/class-ai-seo-core.php:184
+msgid "Preview ready. Review and apply changes."
+msgstr ""
+
+#: includes/class-ai-seo-core.php:202
+msgid "Preview expired. Generate again."
+msgstr ""
+
+#: includes/class-ai-seo-core.php:237
+msgid "Images ready. Choose the featured image; the rest will go to the product gallery."
+msgstr ""
+
+#: includes/class-ai-seo-core.php:238
+msgid "Images ready. Choose which one to use as the featured image."
+msgstr ""
+
+#. translators: %d: gallery image count
+#: includes/class-ai-seo-core.php:289
+msgid "Featured image set and %d gallery images assigned."
+msgstr ""
+
+#: includes/class-ai-seo-core.php:292
+msgid "Featured image assigned successfully."
+msgstr ""
+
+#: includes/class-ai-seo-core.php:325
+msgid "Staged images discarded."
+msgstr ""
+
+#: includes/class-ai-seo-core.php:346
+msgid "Images restored to the previous state."
+msgstr ""
+
+#: includes/class-ai-seo-core.php:347
+msgid "Previous SEO state restored."
+msgstr ""
+
+#: includes/class-ai-seo-core.php:380
+msgid "API connection successful."
+msgstr ""
+
+#: includes/class-ai-seo-core.php:426
+msgid "Enter your OpenAI API key first."
+msgstr ""
+
+#: includes/class-ai-seo-core.php:430
+#: includes/class-ai-seo-settings.php:881
+#: includes/class-ai-seo-settings.php:918
+msgid "Invalid OpenAI API key. Keys must start with \"sk-\" (for example sk-proj-…)."
+msgstr ""
+
+#: includes/class-ai-seo-core.php:440
+msgid "OpenAI API connection successful."
+msgstr ""
+
+#: includes/class-ai-seo-core.php:479
+msgid "Post already has SEO fields."
+msgstr ""
+
+#: includes/class-ai-seo-core.php:591
+msgid "SEO fields generated and saved successfully."
+msgstr ""
+
+#: includes/class-ai-seo-core.php:613
+msgid "Invalid post."
+msgstr ""
+
+#: includes/class-ai-seo-core.php:621
+msgid "This content type is not enabled in AI SEO Filler settings."
+msgstr ""
+
+#: includes/class-ai-seo-gemini.php:78
+msgid "Stored Gemini API key is invalid. Go to AI SEO Filler → Settings and paste your key again."
+msgstr ""
+
+#: includes/class-ai-seo-gemini.php:148
+msgid "Gemini API test failed."
+msgstr ""
+
+#. translators: %s: network error message
+#: includes/class-ai-seo-gemini.php:206
+#: includes/class-ai-seo-gemini.php:295
+#: includes/class-ai-seo-gemini.php:396
+msgid "Gemini connection error: %s"
+msgstr ""
+
+#: includes/class-ai-seo-gemini.php:240
+#: includes/class-ai-seo-gemini.php:341
+#: includes/class-ai-seo-gemini.php:442
+msgid "Gemini request failed after multiple attempts."
+msgstr ""
+
+#: includes/class-ai-seo-gemini.php:316
+#: includes/class-ai-seo-gemini.php:417
+#: includes/class-ai-seo-gemini.php:499
+msgid "Gemini response is not valid JSON."
+msgstr ""
+
+#: includes/class-ai-seo-gemini.php:322
+#: includes/class-ai-seo-gemini.php:423
+#: includes/class-ai-seo-gemini.php:524
+msgid "Gemini returned no content."
+msgstr ""
+
+#: includes/class-ai-seo-gemini.php:467
+msgid "Unknown Gemini API error."
+msgstr ""
+
+#: includes/class-ai-seo-gemini.php:470
+msgid "Gemini is temporarily overloaded due to high demand. Please wait a moment and try again."
+msgstr ""
+
+#: includes/class-ai-seo-gemini.php:472
+msgid "Gemini rate limit reached. Please wait a moment and try again."
+msgstr ""
+
+#. translators: 1: HTTP status code, 2: error message
+#: includes/class-ai-seo-gemini.php:479
+msgid "Gemini returned error %1$d: %2$s"
+msgstr ""
+
+#: includes/class-ai-seo-gemini.php:506
+msgid "Gemini blocked this request due to content safety filters."
+msgstr ""
+
+#: includes/class-ai-seo-gemini.php:518
+msgid "Gemini response was truncated. Try again or switch to Groq in Settings."
+msgstr ""
+
+#: includes/class-ai-seo-gemini.php:534
+msgid "Gemini response was truncated before completing the JSON. Try again or switch to Groq."
+msgstr ""
+
+#: includes/class-ai-seo-groq.php:70
+msgid "Stored Groq API key is invalid. Go to AI SEO Filler → Settings and paste your key again."
+msgstr ""
+
+#: includes/class-ai-seo-groq.php:131
+msgid "Groq API test failed."
+msgstr ""
+
+#. translators: %s: network error message
+#: includes/class-ai-seo-groq.php:186
+#: includes/class-ai-seo-groq.php:344
+msgid "Groq connection error: %s"
+msgstr ""
+
+#: includes/class-ai-seo-groq.php:220
+#: includes/class-ai-seo-groq.php:378
+msgid "Groq request failed after multiple attempts."
+msgstr ""
+
+#: includes/class-ai-seo-groq.php:243
+msgid "Unknown Groq API error."
+msgstr ""
+
+#: includes/class-ai-seo-groq.php:250
+msgid "Groq is temporarily overloaded. Please wait a moment and try again."
+msgstr ""
+
+#: includes/class-ai-seo-groq.php:252
+msgid "Groq rate limit reached. Please wait a moment and try again."
+msgstr ""
+
+#. translators: 1: HTTP status code, 2: error message
+#: includes/class-ai-seo-groq.php:259
+msgid "Groq returned error %1$d: %2$s"
+msgstr ""
+
+#: includes/class-ai-seo-groq.php:279
+msgid "Groq response is not valid JSON."
+msgstr ""
+
+#: includes/class-ai-seo-groq.php:286
+msgid "Groq returned no content."
+msgstr ""
+
+#: includes/class-ai-seo-history.php:196
+msgid "Nothing to undo for this post."
+msgstr ""
+
+#: includes/class-ai-seo-history.php:594
+msgid "SEO (meta only)"
+msgstr ""
+
+#: includes/class-ai-seo-openai.php:140
+msgid "OpenAI API test failed."
+msgstr ""
+
+#. translators: %d: HTTP status code
+#: includes/class-ai-seo-openai.php:212
+#: includes/class-ai-seo-openai.php:295
+msgid "OpenAI API error (HTTP %d)."
+msgstr ""
+
+#: includes/class-ai-seo-openai.php:227
+#: includes/class-ai-seo-openai.php:310
+msgid "OpenAI API failed after retries."
+msgstr ""
+
+#: includes/class-ai-seo-seo-checker.php:60
+msgid "Focus keyword in SEO title"
+msgstr ""
+
+#: includes/class-ai-seo-seo-checker.php:64
+msgid "Focus keyword in meta description"
+msgstr ""
+
+#: includes/class-ai-seo-seo-checker.php:68
+msgid "Focus keyword in URL slug"
+msgstr ""
+
+#: includes/class-ai-seo-seo-checker.php:72
+msgid "Focus keyword at beginning of content"
+msgstr ""
+
+#: includes/class-ai-seo-seo-checker.php:76
+msgid "Focus keyword used 3+ times in content"
+msgstr ""
+
+#. translators: %d: minimum word count
+#: includes/class-ai-seo-seo-checker.php:81
+msgid "Content at least %d words"
+msgstr ""
+
+#: includes/class-ai-seo-seo-checker.php:85
+msgid "Subheadings (H2/H3) in content"
+msgstr ""
+
+#: includes/class-ai-seo-seo-checker.php:92
+msgid "Image alt texts provided"
+msgstr ""
+
+#: includes/class-ai-seo-settings.php:207
+msgid "Invalid Gemini API key. Keys from Google AI Studio start with \"AIza\" or \"AQ.\"."
+msgstr ""
+
+#: includes/class-ai-seo-settings.php:335
+msgid "Gemini Flash Latest (free tier)"
+msgstr ""
+
+#: includes/class-ai-seo-settings.php:336
+msgid "Gemini 2.0 Flash"
+msgstr ""
+
+#: includes/class-ai-seo-settings.php:337
+msgid "Gemini 1.5 Flash"
+msgstr ""
+
+#: includes/class-ai-seo-settings.php:338
+msgid "Gemini 2.5 Flash"
+msgstr ""
+
+#: includes/class-ai-seo-settings.php:441
+msgid "Groq API key is not configured. Go to AI SEO Filler → Settings."
+msgstr ""
+
+#: includes/class-ai-seo-settings.php:445
+msgid "OpenAI API key is not configured. Go to AI SEO Filler → Settings."
+msgstr ""
+
+#: includes/class-ai-seo-settings.php:448
+msgid "Gemini API key is not configured. Go to AI SEO Filler → Settings."
+msgstr ""
+
+#: includes/class-ai-seo-settings.php:491
+msgid "Invalid Groq API key. Keys from console.groq.com start with \"gsk_\"."
+msgstr ""
+
+#: includes/class-ai-seo-settings.php:508
+msgid "Llama 3.3 70B Versatile (recommended)"
+msgstr ""
+
+#: includes/class-ai-seo-settings.php:509
+msgid "Llama 3.1 8B Instant (fast)"
+msgstr ""
+
+#: includes/class-ai-seo-settings.php:510
+msgid "Gemma 2 9B IT"
+msgstr ""
+
+#: includes/class-ai-seo-settings.php:511
+msgid "Mixtral 8x7B"
+msgstr ""
+
+#: includes/class-ai-seo-settings.php:875
+msgid "Enter your OpenAI API key."
+msgstr ""
+
+#: includes/class-ai-seo-settings.php:890
+#: includes/class-ai-seo-settings.php:930
+msgid "Could not encrypt the OpenAI API key. Check that OpenSSL is enabled in PHP."
+msgstr ""
+
+#: includes/class-ai-seo-settings.php:954
+msgid "GPT-4o Mini (recommended)"
+msgstr ""
+
+#: includes/class-ai-seo-settings.php:955
+msgid "GPT-4o"
+msgstr ""
+
+#: includes/class-ai-seo-settings.php:956
+msgid "GPT-4.1 Mini"
+msgstr ""
+
+#: includes/class-ai-seo-settings.php:1264
+msgid "Select at least one content type. Restored defaults (posts, pages, and products when available)."
+msgstr ""
+
+#: includes/class-ai-seo-settings.php:1453
+msgid "Auto (Flux free, then Gemini, then OpenAI)"
+msgstr ""
+
+#: includes/class-ai-seo-settings.php:1454
+msgid "Flux / Pollinations (free, no API key)"
+msgstr ""
+
+#: includes/class-ai-seo-settings.php:1455
+msgid "OpenAI (DALL·E / GPT Image)"
+msgstr ""
+
+#: includes/class-ai-seo-settings.php:1456
+msgid "Gemini (free tier limits apply)"
+msgstr ""
+
+#: includes/class-ai-seo-woocommerce.php:150
+msgid "This post is not a WooCommerce product."
+msgstr ""
+
+#: includes/class-ai-seo-woocommerce.php:156
+msgid "Could not load WooCommerce product."
 msgstr ""

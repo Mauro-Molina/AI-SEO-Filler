@@ -163,6 +163,9 @@ class WooCommerce {
 		if ( $featured_id ) {
 			$product->set_image_id( $featured_id );
 			set_post_thumbnail( $post_id, $featured_id );
+		} else {
+			$product->set_image_id( 0 );
+			delete_post_thumbnail( $post_id );
 		}
 
 		$product->set_gallery_image_ids( $gallery_ids );

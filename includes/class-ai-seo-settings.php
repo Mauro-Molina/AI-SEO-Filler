@@ -168,6 +168,16 @@ class Settings {
 			'sanitize_callback' => array( $this, 'sanitize_bulk_rate_limit' ),
 			'default'           => 2,
 		) );
+
+		register_setting(
+			'ai_seo_filler_settings',
+			AI_SEO_FILLER_OPTION_PREFIX . 'enabled_post_types',
+			array(
+				'type'              => 'array',
+				'sanitize_callback' => array( $this, 'sanitize_enabled_post_types' ),
+				'default'           => array( 'post', 'page' ),
+			)
+		);
 	}
 
 	/**
@@ -1076,16 +1086,206 @@ class Settings {
 	}
 
 	/**
+	 * Default post types when no setting is saved yet.
+	 *
+	 * @return string[]
+	 */
+	public static function get_default_post_types() {
+		$types = array( 'post', 'page' );
+
+		if ( class_exists( 'WooCommerce' ) && post_type_exists( 'product' ) ) {
+			$types[] = 'product';
+		}
+
+		return $types;
+	}
+
+	/**
+	 * Post types that can be enabled in settings (UI-visible types).
+	 *
+	 * @return array<string, string> Slug => label.
+	 */
+	public static function get_selectable_post_types() {
+		$objects = get_post_types(
+			array(
+				'show_ui' => true,
+			),
+			'objects'
+		);
+
+		$exclude = array(
+			'attachment',
+			'revision',
+			'nav_menu_item',
+			'custom_css',
+			'customize_changeset',
+			'oembed_cache',
+			'user_request',
+			'wp_block',
+			'wp_template',
+			'wp_template_part',
+			'wp_global_styles',
+			'wp_navigation',
+			'wp_font_family',
+			'wp_font_face',
+			'wp_pattern',
+		);
+
+		/**
+		 * Filters post types excluded from the AI SEO Filler CPT picker.
+		 *
+		 * @param string[] $exclude Excluded slugs.
+		 */
+		$exclude = apply_filters( 'ai_seo_filler_excluded_post_types', $exclude );
+
+		$result = array();
+
+		foreach ( $objects as $slug => $object ) {
+			if ( in_array( $slug, $exclude, true ) ) {
+				continue;
+			}
+
+			$label = '';
+
+			if ( ! empty( $object->labels->name ) ) {
+				$label = $object->labels->name;
+			} elseif ( ! empty( $object->label ) ) {
+				$label = $object->label;
+			} else {
+				$label = $slug;
+			}
+
+			$result[ $slug ] = $label;
+		}
+
+		asort( $result, SORT_NATURAL | SORT_FLAG_CASE );
+
+		return $result;
+	}
+
+	/**
+	 * Post types currently enabled for metabox, bulk, history, etc.
+	 *
+	 * @return string[]
+	 */
+	public static function get_enabled_post_types() {
+		$stored     = get_option( AI_SEO_FILLER_OPTION_PREFIX . 'enabled_post_types', null );
+		$selectable = array_keys( self::get_selectable_post_types() );
+		$defaults   = array_values( array_intersect( self::get_default_post_types(), $selectable ) );
+
+		if ( empty( $defaults ) ) {
+			$defaults = array( 'post', 'page' );
+		}
+
+		if ( null === $stored ) {
+			return $defaults;
+		}
+
+		if ( ! is_array( $stored ) ) {
+			$stored = array();
+		}
+
+		$enabled = array();
+
+		foreach ( $stored as $slug ) {
+			$slug = sanitize_key( $slug );
+
+			if ( $slug && in_array( $slug, $selectable, true ) ) {
+				$enabled[] = $slug;
+			}
+		}
+
+		$enabled = array_values( array_unique( $enabled ) );
+
+		return ! empty( $enabled ) ? $enabled : $defaults;
+	}
+
+	/**
+	 * Human-readable label for a post type slug.
+	 *
+	 * @param string $post_type Post type slug.
+	 * @return string
+	 */
+	public static function get_post_type_label( $post_type ) {
+		$post_type = sanitize_key( $post_type );
+		$selectable = self::get_selectable_post_types();
+
+		if ( isset( $selectable[ $post_type ] ) ) {
+			return $selectable[ $post_type ];
+		}
+
+		$object = get_post_type_object( $post_type );
+
+		if ( $object && ! empty( $object->labels->name ) ) {
+			return $object->labels->name;
+		}
+
+		return $post_type;
+	}
+
+	/**
+	 * Whether a post type is enabled for the plugin.
+	 *
+	 * @param string $post_type Post type slug.
+	 * @return bool
+	 */
+	public static function is_post_type_enabled( $post_type ) {
+		return in_array( sanitize_key( $post_type ), self::get_enabled_post_types(), true );
+	}
+
+	/**
+	 * Sanitizes the enabled post types checkbox list.
+	 *
+	 * @param mixed $value Raw value.
+	 * @return string[]
+	 */
+	public function sanitize_enabled_post_types( $value ) {
+		if ( ! is_array( $value ) ) {
+			$value = array();
+		}
+
+		$selectable = array_keys( self::get_selectable_post_types() );
+		$clean      = array();
+
+		foreach ( $value as $slug ) {
+			$slug = sanitize_key( $slug );
+
+			if ( $slug && in_array( $slug, $selectable, true ) ) {
+				$clean[] = $slug;
+			}
+		}
+
+		$clean = array_values( array_unique( $clean ) );
+
+		if ( empty( $clean ) ) {
+			add_settings_error(
+				'ai_seo_filler_settings',
+				'enabled_post_types_empty',
+				__( 'Select at least one content type. Restored defaults (posts, pages, and products when available).', 'ai-seo-filler' ),
+				'warning'
+			);
+
+			return array_values( array_intersect( self::get_default_post_types(), $selectable ) ) ?: array( 'post', 'page' );
+		}
+
+		return $clean;
+	}
+
+	/**
 	 * Per post-type min word overrides.
 	 *
 	 * @return array<string, int>
 	 */
 	public static function get_post_type_min_words() {
-		return array(
-			'post'    => absint( get_option( AI_SEO_FILLER_OPTION_PREFIX . 'min_words_post', 0 ) ) ?: self::get_min_word_count(),
-			'page'    => absint( get_option( AI_SEO_FILLER_OPTION_PREFIX . 'min_words_page', 0 ) ) ?: self::get_min_word_count(),
-			'product' => absint( get_option( AI_SEO_FILLER_OPTION_PREFIX . 'min_words_product', 0 ) ) ?: self::get_min_word_count(),
-		);
+		$defaults = self::get_min_word_count();
+		$result   = array();
+
+		foreach ( self::get_enabled_post_types() as $post_type ) {
+			$override = absint( get_option( AI_SEO_FILLER_OPTION_PREFIX . 'min_words_' . $post_type, 0 ) );
+			$result[ $post_type ] = $override >= 300 ? $override : $defaults;
+		}
+
+		return $result;
 	}
 
 	/**
