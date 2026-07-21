@@ -7,6 +7,9 @@
 
 defined( 'ABSPATH' ) || exit;
 
+// Template variables are local to this included view.
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+
 use AiSeoFiller\AI_Provider;
 use AiSeoFiller\Core;
 use AiSeoFiller\Settings;

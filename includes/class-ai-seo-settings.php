@@ -286,7 +286,7 @@ class Settings {
 		 *
 		 * @param array<string, string> $languages Locale => label.
 		 */
-		return apply_filters( 'ai_seo_filler_content_languages', $languages );
+		return apply_filters( 'aiseofiller_content_languages', $languages );
 	}
 
 	/**
@@ -852,7 +852,8 @@ class Settings {
 		}
 
 		if ( isset( $_POST[ self::OPENAI_SECRET_FIELD ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$alternate = self::normalize_secret_key( wp_unslash( $_POST[ self::OPENAI_SECRET_FIELD ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Missing -- normalized below.
+			$alternate = self::normalize_secret_key( wp_unslash( $_POST[ self::OPENAI_SECRET_FIELD ] ) );
 
 			if ( '' !== $alternate && ! self::is_secret_placeholder( $alternate ) ) {
 				return $alternate;
@@ -1136,7 +1137,7 @@ class Settings {
 		 *
 		 * @param string[] $exclude Excluded slugs.
 		 */
-		$exclude = apply_filters( 'ai_seo_filler_excluded_post_types', $exclude );
+		$exclude = apply_filters( 'aiseofiller_excluded_post_types', $exclude );
 
 		$result = array();
 

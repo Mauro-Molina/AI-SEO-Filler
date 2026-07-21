@@ -1,13 +1,13 @@
 <?php
 /**
  * Plugin Name:     AI SEO Filler
- * Plugin URI:      https://yourwebsite.com/ai-seo-filler
+ * Plugin URI:      https://github.com/Mauro-Molina/AI-SEO-Filler
  * Description:     Automatically generates SEO fields for WooCommerce products, posts and pages using Gemini Flash, and writes them to Rank Math and Yoast SEO.
  * Author:          Mauro Molina Mazón
- * Author URI:      https://yourwebsite.com
+ * Author URI:      https://github.com/Mauro-Molina
  * Text Domain:     ai-seo-filler
  * Domain Path:     /languages
- * Version:         0.3.1
+ * Version:         0.3.2
  * Requires at least: 6.0
  * Requires PHP:    7.4
  * License:         GPL-2.0-or-later
@@ -19,7 +19,7 @@
 defined( 'ABSPATH' ) || exit;
 
 /** Current plugin version. */
-define( 'AI_SEO_FILLER_VERSION', '0.3.1' );
+define( 'AI_SEO_FILLER_VERSION', '0.3.2' );
 
 /** Absolute path to the plugin directory. */
 define( 'AI_SEO_FILLER_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );

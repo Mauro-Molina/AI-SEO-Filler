@@ -41,8 +41,6 @@ class AI_Images {
 			return new \WP_Error( 'forbidden', __( 'You cannot upload images for this post.', 'ai-seo-filler' ) );
 		}
 
-		@set_time_limit( 300 );
-
 		$context    = self::gather_image_context( $post );
 		$is_product = WooCommerce::is_product( $post );
 		$plan       = self::build_image_plan( $context, $is_product );
@@ -218,7 +216,7 @@ class AI_Images {
 		 * @param array $result  Summary data.
 		 */
 		do_action(
-			'ai_seo_filler_after_generate_images',
+			'aiseofiller_after_generate_images',
 			$post_id,
 			array(
 				'featured_id' => $featured_id,
@@ -303,9 +301,9 @@ class AI_Images {
 			'featured_html'  => $featured_html,
 			'gallery_ids'    => $gallery_ids,
 			'gallery'        => $gallery,
-			'remove_label'   => __( 'Remove product image', 'woocommerce' ),
-			'delete_label'   => __( 'Delete', 'woocommerce' ),
-			'set_label'      => __( 'Set product image', 'woocommerce' ),
+			'remove_label'   => __( 'Remove product image', 'ai-seo-filler' ),
+			'delete_label'   => __( 'Delete', 'ai-seo-filler' ),
+			'set_label'      => __( 'Set product image', 'ai-seo-filler' ),
 		);
 	}
 

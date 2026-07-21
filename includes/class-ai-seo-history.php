@@ -230,7 +230,7 @@ class History {
 		 * @param array $result  Restored payload.
 		 * @param array $entry   History entry that was undone.
 		 */
-		do_action( 'ai_seo_filler_after_undo', $post_id, $result, $entry );
+		do_action( 'aiseofiller_after_undo', $post_id, $result, $entry );
 
 		return $result;
 	}
@@ -489,6 +489,7 @@ class History {
 			'post_status'            => array( 'publish', 'draft', 'pending', 'private', 'future' ),
 			'posts_per_page'         => 200,
 			'fields'                 => 'ids',
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- filter posts that have plugin history.
 			'meta_key'               => self::META_KEY,
 			'orderby'                => 'modified',
 			'order'                  => 'DESC',

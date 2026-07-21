@@ -1,7 +1,7 @@
 
 {
   "name": "ai-seo-filler",
-  "version": "0.1.0",
+  "version": "0.3.2",
   "main": "Gruntfile.js",
   "author": "Mauro Molina Mazón",
   "scripts" : {

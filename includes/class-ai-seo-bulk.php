@@ -93,6 +93,7 @@ class Bulk {
 		}
 
 		if ( $category && 'product' === $post_type ) {
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- intentional product category filter.
 			$query_args['tax_query'] = array(
 				array(
 					'taxonomy' => 'product_cat',
@@ -139,6 +140,11 @@ class Bulk {
 
 	public function ajax_bulk_estimate() {
 		check_ajax_referer( 'ai_seo_filler_nonce', 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'ai-seo-filler' ) ), 403 );
+		}
+
 		$total = isset( $_POST['total'] ) ? absint( $_POST['total'] ) : 0;
 		wp_send_json_success( array( 'estimate_minutes' => $this->estimate_minutes( $total ) ) );
 	}

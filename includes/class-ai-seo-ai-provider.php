@@ -118,7 +118,7 @@ class AI_Provider {
 			 * @param string $provider Provider slug.
 			 * @param array  $args     Generation args.
 			 */
-			do_action( 'ai_seo_filler_before_generate', $post_id, $slug, $args );
+			do_action( 'aiseofiller_before_generate', $post_id, $slug, $args );
 
 			$result = $provider->generate_seo_data( $post_id, $args );
 
@@ -140,7 +140,7 @@ class AI_Provider {
 				 * @param array $result  SEO data.
 				 * @param int   $post_id Post ID.
 				 */
-				do_action( 'ai_seo_filler_after_generate', $result, $post_id );
+				do_action( 'aiseofiller_after_generate', $result, $post_id );
 
 				return $result;
 			}

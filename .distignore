@@ -8,6 +8,8 @@
 .git
 .gitignore
 .github
+.wordpress-org
+assets
 .gitlab-ci.yml
 .travis.yml
 .DS_Store
@@ -31,6 +33,7 @@ multisite.xml.dist
 phpcs.xml
 .phpcs.xml.dist
 phpcs.xml.dist
+Gruntfile.js
 README.md
 webpack.config.js
 wp-cli.local.yml

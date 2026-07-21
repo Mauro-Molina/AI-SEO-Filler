@@ -58,6 +58,8 @@ class Core {
 	public function load_textdomain() {
 		add_filter( 'load_textdomain_mofile', array( $this, 'filter_textdomain_mofile' ), 10, 2 );
 
+		// Still useful when the plugin is installed from GitHub (not WordPress.org language packs).
+		// phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound
 		load_plugin_textdomain(
 			'ai-seo-filler',
 			false,
@@ -120,6 +122,7 @@ class Core {
 			wp_send_json_error( array( 'message' => $post_id->get_error_message() ), 400 );
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in verify_editor_request().
 		$mode = isset( $_POST['mode'] ) ? sanitize_text_field( wp_unslash( $_POST['mode'] ) ) : 'full';
 		$args = array( 'mode' => in_array( $mode, array( 'full', 'meta_only' ), true ) ? $mode : 'full' );
 
@@ -141,6 +144,7 @@ class Core {
 			wp_send_json_error( array( 'message' => $post_id->get_error_message() ), 400 );
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in verify_editor_request().
 		$mode = isset( $_POST['mode'] ) ? sanitize_text_field( wp_unslash( $_POST['mode'] ) ) : 'full';
 		$args = array( 'mode' => in_array( $mode, array( 'full', 'meta_only' ), true ) ? $mode : 'full' );
 
@@ -194,9 +198,11 @@ class Core {
 			wp_send_json_error( array( 'message' => $post_id->get_error_message() ), 400 );
 		}
 
-		$preview_key    = isset( $_POST['preview_key'] ) ? sanitize_text_field( wp_unslash( $_POST['preview_key'] ) ) : '';
-		$focus_keyword  = isset( $_POST['focus_keyword'] ) ? sanitize_text_field( wp_unslash( $_POST['focus_keyword'] ) ) : '';
-		$stored         = get_transient( 'ai_seo_fill_' . $preview_key );
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- verified in verify_editor_request().
+		$preview_key   = isset( $_POST['preview_key'] ) ? sanitize_text_field( wp_unslash( $_POST['preview_key'] ) ) : '';
+		$focus_keyword = isset( $_POST['focus_keyword'] ) ? sanitize_text_field( wp_unslash( $_POST['focus_keyword'] ) ) : '';
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+		$stored        = get_transient( 'ai_seo_fill_' . $preview_key );
 
 		if ( empty( $stored ) || (int) $stored['post_id'] !== $post_id ) {
 			wp_send_json_error( array( 'message' => __( 'Preview expired. Generate again.', 'ai-seo-filler' ) ), 400 );
@@ -261,20 +267,22 @@ class Core {
 			wp_send_json_error( array( 'message' => $post_id->get_error_message() ), 400 );
 		}
 
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- verified in verify_editor_request().
 		$staging_key = isset( $_POST['staging_key'] ) ? sanitize_text_field( wp_unslash( $_POST['staging_key'] ) ) : '';
 		$featured_id = isset( $_POST['featured_id'] ) ? absint( $_POST['featured_id'] ) : 0;
 		$gallery_ids = array();
 
 		if ( isset( $_POST['gallery_ids'] ) ) {
-			$raw = wp_unslash( $_POST['gallery_ids'] );
+			$raw = map_deep( wp_unslash( $_POST['gallery_ids'] ), 'sanitize_text_field' );
 
 			if ( is_string( $raw ) ) {
 				$decoded = json_decode( $raw, true );
 				$raw     = is_array( $decoded ) ? $decoded : explode( ',', $raw );
 			}
 
-			$gallery_ids = array_map( 'absint', (array) $raw );
+			$gallery_ids = array_values( array_filter( array_map( 'absint', (array) $raw ) ) );
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		$result = AI_Images::apply_selection( $post_id, $staging_key, $featured_id, $gallery_ids );
 
@@ -315,6 +323,7 @@ class Core {
 			wp_send_json_error( array( 'message' => $post_id->get_error_message() ), 400 );
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in verify_editor_request().
 		$staging_key = isset( $_POST['staging_key'] ) ? sanitize_text_field( wp_unslash( $_POST['staging_key'] ) ) : '';
 		$result      = AI_Images::discard_staged( $post_id, $staging_key );
 
@@ -390,6 +399,7 @@ class Core {
 			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'ai-seo-filler' ) ), 403 );
 		}
 
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- normalized in Settings::normalize_secret_key().
 		$key = isset( $_POST['key'] ) ? Settings::normalize_secret_key( wp_unslash( $_POST['key'] ) ) : '';
 
 		$result = Settings::persist_openai_api_key( $key );
@@ -416,6 +426,7 @@ class Core {
 			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'ai-seo-filler' ) ), 403 );
 		}
 
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- normalized in Settings::normalize_secret_key().
 		$key = isset( $_POST['key'] ) ? Settings::normalize_secret_key( wp_unslash( $_POST['key'] ) ) : '';
 
 		if ( Settings::is_secret_placeholder( $key ) ) {
@@ -456,14 +467,29 @@ class Core {
 		header( 'Content-Type: text/csv; charset=utf-8' );
 		header( 'Content-Disposition: attachment; filename=ai-seo-filler-errors.csv' );
 
-		$out = fopen( 'php://output', 'w' );
-		fputcsv( $out, array( 'post_id', 'message', 'timestamp' ) );
+		$escape_csv = static function ( $value ) {
+			$value = (string) $value;
+			if ( strpbrk( $value, "\",\n\r" ) !== false ) {
+				return '"' . str_replace( '"', '""', $value ) . '"';
+			}
+			return $value;
+		};
+
+		$lines   = array();
+		$lines[] = 'post_id,message,timestamp';
 
 		foreach ( $errors as $error ) {
-			fputcsv( $out, array( $error['post_id'] ?? '', $error['message'] ?? '', isset( $error['time'] ) ? gmdate( 'c', $error['time'] ) : '' ) );
+			$lines[] = implode(
+				',',
+				array(
+					$escape_csv( $error['post_id'] ?? '' ),
+					$escape_csv( $error['message'] ?? '' ),
+					$escape_csv( isset( $error['time'] ) ? gmdate( 'c', $error['time'] ) : '' ),
+				)
+			);
 		}
 
-		fclose( $out );
+		echo implode( "\n", $lines ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSV download headers set above.
 		exit;
 	}
 
@@ -550,7 +576,7 @@ class Core {
 		 * @param int   $post_id  Post ID.
 		 * @param array $seo_data Saved SEO data.
 		 */
-		do_action( 'ai_seo_filler_after_save', $post_id, $seo_data );
+		do_action( 'aiseofiller_after_save', $post_id, $seo_data );
 
 		return $seo_data;
 	}

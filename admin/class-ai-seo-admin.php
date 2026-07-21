@@ -36,6 +36,47 @@ class Admin {
 		add_filter( 'post_row_actions', array( $this, 'row_actions' ), 10, 2 );
 		add_filter( 'page_row_actions', array( $this, 'row_actions' ), 10, 2 );
 		add_action( 'admin_action_ai_seo_filler_generate', array( $this, 'handle_row_action_generate' ) );
+		add_action( 'admin_init', array( $this, 'add_privacy_policy_content' ) );
+	}
+
+	/**
+	 * Suggests privacy policy text for sites that send content to AI providers.
+	 */
+	public function add_privacy_policy_content() {
+		if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
+			return;
+		}
+
+		$content = '<p>' . esc_html__(
+			'AI SEO Filler can send post titles, content, product data, and related prompts to third-party AI services (Google Gemini, Groq, OpenAI, and/or Pollinations) when an authorized user generates SEO text or images. API keys are stored on this site and used only to authenticate those requests. The plugin does not send WordPress login credentials.',
+			'ai-seo-filler'
+		) . '</p>';
+
+		$content .= '<p>' . esc_html__(
+			'Generation runs only when triggered by a user with permission (or by an admin-started bulk job). Review each provider’s privacy policy and terms before use. Generated media and SEO fields are stored in your WordPress database and media library like other content.',
+			'ai-seo-filler'
+		) . '</p>';
+
+		$content .= '<p>' . wp_kses(
+			sprintf(
+				/* translators: 1: opening link tag to plugin readme external services docs, 2: closing link tag */
+				__( 'For a full list of services, data sent, and policy links, see the %1$sExternal services%2$s section of the plugin documentation.', 'ai-seo-filler' ),
+				'<a href="https://github.com/Mauro-Molina/AI-SEO-Filler/blob/main/readme.txt" target="_blank" rel="noopener noreferrer">',
+				'</a>'
+			),
+			array(
+				'a' => array(
+					'href'   => true,
+					'target' => true,
+					'rel'    => true,
+				),
+			)
+		) . '</p>';
+
+		wp_add_privacy_policy_content(
+			'AI SEO Filler',
+			wp_kses_post( $content )
+		);
 	}
 
 	public function register_menu() {
